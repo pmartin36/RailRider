@@ -25,16 +25,21 @@ public class Rail : MonoBehaviour {
 	private Vector3 lastRailSpawnPosition;
 	private RailSegment previousRailSegment;
 
-	private List<Vector3> nodes;
+	private List<RailNode> nodes;
+
+	public RailNode LastNode {
+		get {
+			return nodes.Last();
+		}
+	}
 
 	// Use this for initialization
 	void Awake () {
 		railManager = GetComponentInParent<RailManager>();
 		lastRailSpawnPosition = transform.position;
 		seed = UnityEngine.Random.Range(0, 1000000);
-		nodes = new List<Vector3>();
-		nodes.Add(new Vector2(-35, transform.position.y));
-		nodes.Add(new Vector2(34, transform.position.y));
+		nodes = new List<RailNode>();
+		nodes.Add(new RailNode(new Vector2(35, transform.position.y), Vector3.right, Vector3.up));
 	}
 	
 	// Update is called once per frame
@@ -58,7 +63,7 @@ public class Rail : MonoBehaviour {
 		}
 		else {
 			previousRailSegment = null;
-			nodes.Add(Vector3.back);
+			nodes.Add(RailNode.Invalid);
 			lastRailSpawnPosition = transform.position;
 		}
 	}
@@ -73,8 +78,8 @@ public class Rail : MonoBehaviour {
 	private RailSegment CreateRailSegment(float size) {
 		RailSegment r = RailSegment.Create();
 		r.parentRail = this;
-		var positions = r.CalculateNodes(size, lastRailSpawnPosition, this.transform.position);
-		nodes.AddRange(positions);
+		var newNodes = r.CalculateNodes(size, lastRailSpawnPosition, this.transform.position);
+		nodes.AddRange(newNodes);
 
 		previousRailSegment = r;
 		lastRailSpawnPosition = transform.position;
@@ -84,15 +89,15 @@ public class Rail : MonoBehaviour {
 	// player just hopped on rail
 	public int GetTargetIndex(List<RailSegment> rs, Vector3 collisionPosition) {
 		var rnodes = rs.SelectMany( r => r.Nodes );
-		var sortedNodes = rnodes.Select( (n,i) => new { position = n, index = i }).OrderBy( n => Vector2.Distance(n.position, collisionPosition) ).ToList();
-		Vector3 selectedNode = sortedNodes[1].index > sortedNodes[0].index ?  sortedNodes[1].position : sortedNodes[0].position;
+		var sortedNodes = rnodes.OrderBy( n => Vector2.Distance(n.Position, collisionPosition) ).ToList();
+		RailNode selectedNode = sortedNodes.Count > 1 && sortedNodes[1].index > sortedNodes[0].index ?  sortedNodes[1] : sortedNodes[0];
 
-		var nodeIndex = nodes.IndexOf(selectedNode);
+		var nodeIndex = nodes.LastIndexOf(selectedNode);
 		return nodeIndex < 0 ? 0 : nodeIndex;
 	}
 
-	public Vector3 GetTargetPosition(int index) {
-		return index < nodes.Count ? nodes[index] : Vector3.back;
+	public RailNode GetTargetRailNode(int index) {
+		return index < nodes.Count ? nodes[index] : RailNode.Invalid;
 	}
 	
 	public void RemoveNodes(int numNodes) {

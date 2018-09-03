@@ -6,7 +6,7 @@ using UnityEngine;
 public class RailRider : MonoBehaviour {
 
 	public Rail AttachedRail;
-	protected Vector3 targetPosition = Vector3.forward;
+	protected RailNode target = RailNode.Invalid;
 	public float MaxSpeed;
 
 	private float RailSpeed;
@@ -21,10 +21,10 @@ public class RailRider : MonoBehaviour {
 	public virtual void Start () {
 		RailIndex = 1;
 		ConnectToRail(AttachedRail);
-		targetPosition = AttachedRail.GetTargetPosition(RailIndex);
+		target = AttachedRail.GetTargetRailNode(RailIndex);
 
 		RailSpeed = MaxSpeed;
-		Gravity = -10f;
+		Gravity = -15f;
 
 		mainCamera = Camera.main;
 		cc = GetComponent<CircleCollider2D>();
@@ -52,6 +52,7 @@ public class RailRider : MonoBehaviour {
 		else {
 			float movement = RailSpeed * Time.deltaTime;
 			while (AttachedRail != null && movement > 0) {
+				Vector3 targetPosition = target.Position;
 				float dist = Vector3.Distance(targetPosition, this.transform.position);
 				if (dist > movement) {
 					transform.position = Vector3.Lerp(transform.position, targetPosition, movement / dist);
@@ -61,9 +62,9 @@ public class RailRider : MonoBehaviour {
 					movement -= dist;
 					transform.position = targetPosition;
 					RailIndex++;
-					Vector3 nextPosition = AttachedRail.GetTargetPosition(RailIndex);
-					if(nextPosition != Vector3.back) {
-						targetPosition = nextPosition;
+					RailNode nextPosition = AttachedRail.GetTargetRailNode(RailIndex);
+					if(nextPosition != RailNode.Invalid) {
+						target = nextPosition;
 					}
 					else {
 						DisconnectFromRail();
@@ -86,7 +87,7 @@ public class RailRider : MonoBehaviour {
 		if (r != null) {
 			ConnectToRail(r);
 			RailIndex = AttachedRail.GetTargetIndex(railSegments, transform.position);
-			targetPosition = AttachedRail.GetTargetPosition(RailIndex);
+			target = AttachedRail.GetTargetRailNode(RailIndex);
 		}
 	}
 
@@ -97,9 +98,6 @@ public class RailRider : MonoBehaviour {
 
 	public void RailRemovedNodes(object sender, int numRemoved) {
 		RailIndex = Mathf.Max(RailIndex - numRemoved, 0);
-		Debug.Log(Time.time);
-		Debug.Log(transform.position);
-		Debug.Log(AttachedRail.GetTargetPosition(RailIndex));
 	}
 
 	public virtual void OnTriggerEnter2D(Collider2D collision) {

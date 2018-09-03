@@ -10,7 +10,7 @@ public class MainCamera : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update () {
-		//transform.position = GameManager.Instance.Player.transform.position + Vector3.back * 10;
+	void LateUpdate () {
+		transform.position = new Vector3(GameManager.Instance.Player.transform.position.x+12, 0) + Vector3.back * 10;
 	}
 }

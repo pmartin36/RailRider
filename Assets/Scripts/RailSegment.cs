@@ -18,29 +18,24 @@ public class RailSegment : PoolObject {
 
 	private PolygonCollider2D pc;
 
-	public Vector2[] RailDirection;
-	public Vector3[] Nodes;
+	public RailNode[] Nodes;
 
 	public void Awake() {
 		RailSegmentContainer = RailSegmentContainer ?? GameObject.FindGameObjectWithTag("SegmentContainer");
 		transform.parent = RailSegmentContainer.transform;
 		lr = GetComponent<LineRenderer>();
-		pc = GetComponent<PolygonCollider2D>();
-
-		RailDirection = new Vector2[NumNodes];
+		pc = GetComponent<PolygonCollider2D>();	
 	}
 
 	public void OnEnable() {
-		RailDirection = new Vector2[NumNodes];
-		if( NumNodes == 2 ) {
-			killTime = Time.time + 30f;
-			Nodes = new Vector3[2];
-			Nodes[0] = new Vector3( -35f, transform.position.y);
-			Nodes[1] = new Vector3( 34f, transform.position.y);
-			NumNodes = 15;
+		Nodes = new RailNode[NumNodes-1];
+		if ( NumNodes == 2 ) {
+			killTime = Time.time + 10f;
+			NumNodes = 30;
+			Nodes[0] = new RailNode(new Vector3(35, parentRail.transform.position.y), Vector3.right, Vector3.up);
 		}
 		else {
-			killTime = Time.time + 20f;
+			killTime = Time.time + 5f;
 		}	
 	}
 
@@ -73,35 +68,39 @@ public class RailSegment : PoolObject {
 	}
 
 
-	public Vector3[] CalculateNodes(float size, Vector3 lastRailSpawnPosition, Vector3 currentPosition) {
+	public RailNode[] CalculateNodes(float size, Vector3 lastRailSpawnPosition, Vector3 currentPosition) {
 		Vector2[] pcPoints = new Vector2[ NumNodes * 2 ];
 		Vector2 lastPosition = lastRailSpawnPosition;
-		Nodes = new Vector3[NumNodes];
+		Vector3[] positions = new Vector3[ NumNodes ];
 
 		for (int i = 0; i < NumNodes; i++) {
 			Vector2 newPosition = Vector3.Lerp(lastRailSpawnPosition, currentPosition, i / ((float)(NumNodes - 1)));
-			Nodes[i] = newPosition;
+			positions[i] = newPosition;
 		
+			Vector2 rd, normal;
 			if( i > 0 ) {
-				Vector2 rd = (newPosition - lastPosition).normalized;
-				Vector2 normal = rd.Rotate(90);
+				rd = (newPosition - lastPosition).normalized;
+				normal = rd.Rotate(90);
 				pcPoints[i] = newPosition + normal * lr.startWidth;
-				pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * lr.startWidth * 1.2f;		
-				RailDirection[i] = rd;		
-
-				if(i == 1) {
-					pcPoints[0] = lastPosition + normal * lr.startWidth;
-					pcPoints[pcPoints.Length - 1] = lastPosition - normal * lr.startWidth * 1.2f;
-					RailDirection[0] = rd;
-				}
+				pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * lr.startWidth * 1.2f;	
+					
+				Nodes[i-1] = new RailNode(i, newPosition, rd, normal );
 			}
+			else {
+				rd = (newPosition - lastPosition).normalized;
+				normal = rd.Rotate(90);
+				pcPoints[0] = newPosition + normal * lr.startWidth;
+				pcPoints[pcPoints.Length - 1] = newPosition - normal * lr.startWidth * 1.2f;
+			}
+
+			Debug.DrawRay(newPosition, rd, Color.green, 1);
+			Debug.DrawRay(newPosition, normal, Color.cyan, 1);
 
 			lastPosition = newPosition;
 		}
 
 		lr.positionCount = NumNodes;
-		lr.SetPositions(Nodes);
-
+		lr.SetPositions(positions);
 		pc.points = pcPoints;
 
 		return Nodes;
@@ -117,7 +116,7 @@ public class RailSegment : PoolObject {
 	}
 
 	public override void Recycle() {
-		parentRail.RemoveNodes(NumNodes);
+		parentRail.RemoveNodes(NumNodes-1);
 		base.Recycle();
 	}
 }

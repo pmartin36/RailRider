@@ -2,7 +2,6 @@
 using System.Linq;
 using UnityEngine;
 
-
 public abstract class Utils {
 	public static Vector2 RandomVectorInBox(Bounds b, float padding = 1) {
 		return new Vector2(
