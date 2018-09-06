@@ -58,10 +58,10 @@ public class RailManager : MonoBehaviour {
 			if (numRailsSinceLastCorruption >= CorruptionOccurrence) {
 				for (int i = 0; i < Rails.Count; i++) {
 					if (i == nextCorruptedRailIndex) {
-						Rails[i].SpawnCorruptedRail(RailSize);
+						Rails[i].SpawnCorruptedRail(RailSize, diff);
 					}
 					else {
-						Rails[i].SpawnRail(RailDensity, RailSize);
+						Rails[i].SpawnRail(RailDensity, RailSize, diff);
 					}
 				}
 				numRailsSinceLastCorruption = 0;
@@ -71,16 +71,16 @@ public class RailManager : MonoBehaviour {
 				nextCorruptedRailIndex = Random.Range(0, Rails.Count);
 				for (int i = 0; i < Rails.Count; i++) {
 					if (i == nextCorruptedRailIndex) {
-						Rails[i].SpawnRail(1, RailSize);
+						Rails[i].SpawnRail(1, RailSize, diff);
 					}
 					else {
-						Rails[i].SpawnRail(RailDensity, RailSize);
+						Rails[i].SpawnRail(RailDensity, RailSize, diff);
 					}
 				}
 			}
 			else {
 				for (int i = 0; i < Rails.Count; i++) {
-					Rails[i].SpawnRail(RailDensity, RailSize);
+					Rails[i].SpawnRail(RailDensity, RailSize, diff);
 				}
 			}
 

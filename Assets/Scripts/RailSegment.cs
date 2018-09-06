@@ -12,8 +12,9 @@ public class RailSegment : PoolObject {
 	private LineRenderer lr;
 	public Rail parentRail;
 
-	[Range(2,30)]
+	[Range(2,100)]
 	public int NumNodes;
+	public bool InitialRailSegment;
 	private float killTime;
 
 	private PolygonCollider2D pc;
@@ -28,15 +29,16 @@ public class RailSegment : PoolObject {
 	}
 
 	public void OnEnable() {
-		Nodes = new RailNode[NumNodes-1];
-		if ( NumNodes == 2 ) {
-			killTime = Time.time + 10f;
-			NumNodes = 30;
+		if (InitialRailSegment) {
+			Nodes = new RailNode[1];
+			killTime = Time.time + 10f;	
 			Nodes[0] = new RailNode(new Vector3(35, parentRail.transform.position.y), Vector3.right, Vector3.up);
+			InitialRailSegment = false;
 		}
 		else {
 			killTime = Time.time + 5f;
-		}	
+		}
+		NumNodes = 30;
 	}
 
 	public void Update() {
@@ -68,13 +70,24 @@ public class RailSegment : PoolObject {
 	}
 
 
-	public RailNode[] CalculateNodes(float size, Vector3 lastRailSpawnPosition, Vector3 currentPosition) {
-		Vector2[] pcPoints = new Vector2[ NumNodes * 2 ];
+	public RailNode[] CalculateNodes(float size, float spawnAngleDiff, Vector3 lastRailSpawnPosition, Vector3 currentPosition) {
+		float totalDistance = Vector3.Distance(lastRailSpawnPosition, currentPosition);
+		float distFactor = (totalDistance / size);
+		NumNodes = (int)(NumNodes * distFactor);
+
+		Vector2 pivot = (currentPosition - lastRailSpawnPosition) / 2f;
+		Vector2 overallNormal = pivot.normalized.Rotate(90);
+		pivot += overallNormal * -spawnAngleDiff/40f;
+		
+
+		Nodes = new RailNode[NumNodes - 1];
+		Vector2[] pcPoints = new Vector2[NumNodes * 2 ];
 		Vector2 lastPosition = lastRailSpawnPosition;
 		Vector3[] positions = new Vector3[ NumNodes ];
 
 		for (int i = 0; i < NumNodes; i++) {
-			Vector2 newPosition = Vector3.Lerp(lastRailSpawnPosition, currentPosition, i / ((float)(NumNodes - 1)));
+			//Vector2 newPosition = Vector3.Lerp(lastRailSpawnPosition, currentPosition, i / ((float)(NumNodes - 1)));
+			Vector2 newPosition = Utils.QuadraticBezier(lastRailSpawnPosition, currentPosition, pivot, i / ((float)(NumNodes - 1)));
 			positions[i] = newPosition;
 		
 			Vector2 rd, normal;

@@ -21,5 +21,9 @@ public abstract class Utils {
 	public static float VectorToAngle(Vector2 vector) {
 		return xyToAngle(vector.x, vector.y);
 	}
+
+	public static Vector2 QuadraticBezier(Vector2 start, Vector2 end, Vector2 ctrl, float t) {
+		return (1-t*t)*start + 2*t*(1-t)*ctrl + t*t*end;
+	}
 }
 
