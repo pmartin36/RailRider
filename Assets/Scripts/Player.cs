@@ -18,13 +18,13 @@ public class Player : RailRider {
 	public void ProcessInputs(InputPackage p) {
 		if (p.Jump && AttachedRail != null) {
 			if(p.Vertical > 0.5f) {
-				Gravity = -Mathf.Abs(Gravity);
-				GravitySpeed += Gravity * 30f * Time.deltaTime;
+				GravityDirection = target.Normal;
+				GravitySpeed = 2f;
 				DisconnectFromRail();
 			}
 			else if(p.Vertical < -0.5f) {
-				Gravity = Mathf.Abs(Gravity);
-				GravitySpeed += Gravity * 30f * Time.deltaTime;
+				GravityDirection = -target.Normal;
+				GravitySpeed = 2f;
 				DisconnectFromRail();
 			}
 			else {

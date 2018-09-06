@@ -6,25 +6,29 @@ using UnityEngine;
 public class RailRider : MonoBehaviour {
 
 	public Rail AttachedRail;
-	protected RailNode target = RailNode.Invalid;
+	public RailNode target = RailNode.Invalid;
+	protected float distanceToTarget;
+	protected float distanceToCenter;
 	public float MaxSpeed;
 
 	private float RailSpeed;
 	protected float GravitySpeed;
 	protected float Gravity;
+	protected Vector3 GravityDirection;
 
-	protected int RailIndex;
+	public int RailIndex;
+
 	protected Camera mainCamera;
 
 	protected CircleCollider2D cc;
 
 	public virtual void Start () {
-		RailIndex = 1;
+		RailIndex = 0;
 		ConnectToRail(AttachedRail);
-		target = AttachedRail.GetTargetRailNode(RailIndex);
+		SetTarget();
 
 		RailSpeed = MaxSpeed;
-		Gravity = -15f;
+		Gravity = 15f;
 
 		mainCamera = Camera.main;
 		cc = GetComponent<CircleCollider2D>();
@@ -32,10 +36,10 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void Update() {
 		if(AttachedRail == null) {
-			GravitySpeed = Mathf.Min( Mathf.Abs(GravitySpeed + Gravity * Time.deltaTime), MaxSpeed) * Mathf.Sign(Gravity);
+			GravitySpeed = Mathf.Min(GravitySpeed + Gravity * Time.deltaTime, MaxSpeed);
 
-			var diff = new Vector3(RailSpeed, GravitySpeed) * Time.deltaTime;
-			var newPosition = transform.position + diff;
+			var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
+			var newPosition = transform.position + diff * Time.deltaTime;
 
 			var viewportPosition = mainCamera.WorldToViewportPoint(newPosition);
 			//if( (viewportPosition.x > 1 && diff.x > 0) ||
@@ -52,34 +56,42 @@ public class RailRider : MonoBehaviour {
 		else {
 			float movement = RailSpeed * Time.deltaTime;
 			while (AttachedRail != null && movement > 0) {
-				Vector3 targetPosition = target.Position;
-				float dist = Vector3.Distance(targetPosition, this.transform.position);
-				if (dist > movement) {
-					transform.position = Vector3.Lerp(transform.position, targetPosition, movement / dist);
+				if (distanceToTarget > movement) {
+					transform.position += target.Direction * movement;
+					distanceToTarget -= movement;
 					movement = 0;
 				}
 				else {
-					movement -= dist;
-					transform.position = targetPosition;
+					movement -= distanceToTarget;
+					transform.position += target.Direction * distanceToTarget;
 					RailIndex++;
-					RailNode nextPosition = AttachedRail.GetTargetRailNode(RailIndex);
-					if(nextPosition != RailNode.Invalid) {
-						target = nextPosition;
-					}
-					else {
-						DisconnectFromRail();
-					}
+					SetTarget();
 				}
 			}
+		}
+	}
+
+	public void SetTarget() {
+		RailNode nextPosition = AttachedRail.GetTargetRailNode(RailIndex);
+		if (nextPosition != RailNode.Invalid) {
+			target = nextPosition;
+
+			var dist = Vector2.Distance(transform.position, target.Position);
+			var angle = Vector2.SignedAngle( transform.position - target.Position, target.Direction ) * Mathf.Deg2Rad;
+
+			distanceToTarget = dist * Mathf.Abs( Mathf.Cos(angle) );
+			distanceToCenter = dist * Mathf.Sin(angle);
+		}
+		else {
+			GravityDirection = -target.Normal;
+			DisconnectFromRail();
 		}
 	}
 
 	public void ConnectToRail(Rail r) {
 		AttachedRail = r;
 		GravitySpeed = 0;
-		Gravity = -10f;
 		AttachedRail.NodesRemoved += RailRemovedNodes;
-		StartCoroutine(CenterOnRail());
 	}
 
 	public void ConnectToRail(List<RailSegment> railSegments) {
@@ -87,7 +99,9 @@ public class RailRider : MonoBehaviour {
 		if (r != null) {
 			ConnectToRail(r);
 			RailIndex = AttachedRail.GetTargetIndex(railSegments, transform.position);
-			target = AttachedRail.GetTargetRailNode(RailIndex);
+			SetTarget();
+
+			StartCoroutine(CenterOnRail());
 		}
 	}
 
@@ -113,12 +127,17 @@ public class RailRider : MonoBehaviour {
 	}
 
 	IEnumerator CenterOnRail() {
-		//float startTime = Time.time;
-		//float startY = transform.position.y;
-		//while( AttachedRail != null && Mathf.Abs(AttachedRail.transform.position.y - transform.position.y) > 0.01f ) {
-		//	transform.position = new Vector2( transform.position.x, Mathf.Lerp( startY, AttachedRail.transform.position.y, (Time.time - startTime) / 0.5f ));
-		//	yield return new WaitForEndOfFrame();
-		//}
-		yield return null;
+		float movement = 2f * Time.deltaTime * Mathf.Sign(distanceToCenter);
+		while (AttachedRail != null && target != null) {		
+			if( Mathf.Abs(movement) > Mathf.Abs(distanceToCenter) ) {
+				transform.position += distanceToCenter * target.Normal;
+				yield break;
+			}
+			else {
+				transform.position += movement * target.Normal;
+				distanceToCenter -= movement;
+			}
+			yield return new WaitForEndOfFrame();
+		}
 	}
 }

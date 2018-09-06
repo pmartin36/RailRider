@@ -48,7 +48,11 @@ public class RailManager : MonoBehaviour {
 
 		if(percent >= 1) {
 			var lastSpawnAngle = spawnAngle;
-			spawnAngle += 0;// Perlin.Noise(Time.time) * 50;
+			spawnAngle +=  Perlin.Noise(Time.time/5f) * 40;
+			var diff = spawnAngle - lastSpawnAngle;
+
+			transform.Rotate(0, 0, diff);
+
 			numRailsSinceLastCorruption++;
 
 			if (numRailsSinceLastCorruption >= CorruptionOccurrence) {

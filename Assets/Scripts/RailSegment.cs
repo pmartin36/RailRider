@@ -87,8 +87,15 @@ public class RailSegment : PoolObject {
 				Nodes[i-1] = new RailNode(i, newPosition, rd, normal );
 			}
 			else {
-				rd = (newPosition - lastPosition).normalized;
-				normal = rd.Rotate(90);
+				if( parentRail.LastNode != RailNode.Invalid ) {
+					rd = parentRail.LastNode.Direction;
+					normal = parentRail.LastNode.Normal;
+				}
+				else {
+					Vector2 nextPosition = Vector3.Lerp(lastRailSpawnPosition, currentPosition, (i+1) / ((float)(NumNodes - 1)));
+					rd = (nextPosition - newPosition).normalized;
+					normal = rd.Rotate(90);
+				}	
 				pcPoints[0] = newPosition + normal * lr.startWidth;
 				pcPoints[pcPoints.Length - 1] = newPosition - normal * lr.startWidth * 1.2f;
 			}
