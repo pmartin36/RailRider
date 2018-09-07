@@ -113,7 +113,7 @@ public class RailSegment : PoolObject {
 		else {
 			Vector2 center = (currentPosition + lastRailSpawnPosition) / 2f;
 			Vector2 overallNormal = ((Vector2)(currentPosition - lastRailSpawnPosition).normalized).Rotate(90);
-			pivot = center + overallNormal * -Mathf.Sign(spawnAngleDiff) * distFactor * Mathf.Pow(spawnAngleDiff / 29f, 4);
+			pivot = center + overallNormal * distFactor * -Mathf.Pow(spawnAngleDiff / 25f, 3);
 		}	
 
 		for (int i = 0; i < NumNodes; i++) {	
