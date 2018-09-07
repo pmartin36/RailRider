@@ -9,7 +9,9 @@ public class RailSegment : PoolObject {
 	public static GameObject RailSegmentContainer;
 	private bool Corrupted;
 
-	private LineRenderer lr;
+	private MeshRenderer meshRenderer;
+	private MeshFilter mf;
+	public float Width;
 	public Rail parentRail;
 
 	[Range(2,100)]
@@ -24,7 +26,8 @@ public class RailSegment : PoolObject {
 	public void Awake() {
 		RailSegmentContainer = RailSegmentContainer ?? GameObject.FindGameObjectWithTag("SegmentContainer");
 		transform.parent = RailSegmentContainer.transform;
-		lr = GetComponent<LineRenderer>();
+		meshRenderer = GetComponent<MeshRenderer>();
+		mf = GetComponent<MeshFilter>();
 		pc = GetComponent<PolygonCollider2D>();	
 	}
 
@@ -34,6 +37,26 @@ public class RailSegment : PoolObject {
 			killTime = Time.time + 10f;	
 			Nodes[0] = new RailNode(new Vector3(35, parentRail.transform.position.y), Vector3.right, Vector3.up);
 			InitialRailSegment = false;
+
+			Mesh m = new Mesh();
+			m.vertices = new Vector3[] {
+				new Vector3(-35, parentRail.transform.position.y + Width),
+				new Vector3(35, parentRail.transform.position.y + Width),
+				new Vector3(35, parentRail.transform.position.y - Width),
+				new Vector3(-35, parentRail.transform.position.y - Width)			
+			};
+			m.uv = new Vector2[] {
+				new Vector2(0, 1),
+				new Vector2(1, 1),
+				new Vector2(1, 0),
+				new Vector2(0, 0)
+			};
+			m.triangles = new int[] {
+				0, 1, 3,
+				2, 3, 1
+			};
+			m.RecalculateNormals();
+			mf.sharedMesh = m;
 		}
 		else {
 			killTime = Time.time + 5f;
@@ -50,10 +73,10 @@ public class RailSegment : PoolObject {
 	public void SetCorrupted(bool corrupted) {
 		Corrupted = corrupted;
 		if (corrupted) {
-			lr.material.color = Color.red;
+			meshRenderer.material.color = Color.red;
 		}
 		else {
-			lr.material.color = Color.white;
+			meshRenderer.material.color = Color.white;
 		}
 	}
 
@@ -77,13 +100,14 @@ public class RailSegment : PoolObject {
 
 		Vector2 pivot = (currentPosition - lastRailSpawnPosition) / 2f;
 		Vector2 overallNormal = pivot.normalized.Rotate(90);
-		pivot += overallNormal * -spawnAngleDiff/40f;
+		pivot += overallNormal * Mathf.Sign(spawnAngleDiff) * distFactor * Mathf.Pow( spawnAngleDiff / 30f, 4);
 		
 
 		Nodes = new RailNode[NumNodes - 1];
 		Vector2[] pcPoints = new Vector2[NumNodes * 2 ];
 		Vector2 lastPosition = lastRailSpawnPosition;
 		Vector3[] positions = new Vector3[ NumNodes ];
+		Vector3[] vertices = new Vector3[NumNodes * 2];
 
 		for (int i = 0; i < NumNodes; i++) {
 			//Vector2 newPosition = Vector3.Lerp(lastRailSpawnPosition, currentPosition, i / ((float)(NumNodes - 1)));
@@ -93,10 +117,7 @@ public class RailSegment : PoolObject {
 			Vector2 rd, normal;
 			if( i > 0 ) {
 				rd = (newPosition - lastPosition).normalized;
-				normal = rd.Rotate(90);
-				pcPoints[i] = newPosition + normal * lr.startWidth;
-				pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * lr.startWidth * 1.2f;	
-					
+				normal = rd.Rotate(90);			
 				Nodes[i-1] = new RailNode(i, newPosition, rd, normal );
 			}
 			else {
@@ -109,9 +130,13 @@ public class RailSegment : PoolObject {
 					rd = (nextPosition - newPosition).normalized;
 					normal = rd.Rotate(90);
 				}	
-				pcPoints[0] = newPosition + normal * lr.startWidth;
-				pcPoints[pcPoints.Length - 1] = newPosition - normal * lr.startWidth * 1.2f;
 			}
+
+			vertices[i] = newPosition + normal * Width;
+			vertices[i + NumNodes] = newPosition - normal * Width;
+
+			pcPoints[i] = newPosition + normal * Width * 1.2f;
+			pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * Width * 1.2f;
 
 			Debug.DrawRay(newPosition, rd, Color.green, 1);
 			Debug.DrawRay(newPosition, normal, Color.cyan, 1);
@@ -119,20 +144,24 @@ public class RailSegment : PoolObject {
 			lastPosition = newPosition;
 		}
 
-		lr.positionCount = NumNodes;
-		lr.SetPositions(positions);
 		pc.points = pcPoints;
 
+		Mesh m = new Mesh();
+		m.vertices = vertices;
+		//m.uv = 
+		List <int> tris = new List<int>();
+		for(int i = 0; i < NumNodes - 1; i++) {
+			tris.AddRange(new int [] {
+				i, i+1, i+NumNodes,
+				i+NumNodes+1, i+NumNodes, i+1
+			});
+		}
+		m.triangles = tris.ToArray();
+		
+		m.RecalculateNormals();
+		mf.sharedMesh = m;
+
 		return Nodes;
-	}
-
-	public Vector3 GetNearestNode(Vector3 collisionPoint) {
-		var positions = new Vector3[lr.positionCount];
-		lr.GetPositions(positions);
-
-		var pd = positions.OrderBy(p => Vector2.Distance(p, collisionPoint)).ToList();
-
-		return pd.First();
 	}
 
 	public override void Recycle() {
