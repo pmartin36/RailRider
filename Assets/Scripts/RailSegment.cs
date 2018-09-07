@@ -98,38 +98,44 @@ public class RailSegment : PoolObject {
 		float distFactor = (totalDistance / size);
 		NumNodes = (int)(NumNodes * distFactor);
 
-		Vector2 pivot = (currentPosition - lastRailSpawnPosition) / 2f;
-		Vector2 overallNormal = pivot.normalized.Rotate(90);
-		pivot += overallNormal * Mathf.Sign(spawnAngleDiff) * distFactor * Mathf.Pow( spawnAngleDiff / 30f, 4);
-		
-
 		Nodes = new RailNode[NumNodes - 1];
 		Vector2[] pcPoints = new Vector2[NumNodes * 2 ];
-		Vector2 lastPosition = lastRailSpawnPosition;
 		Vector3[] positions = new Vector3[ NumNodes ];
 		Vector3[] vertices = new Vector3[NumNodes * 2];
 
-		for (int i = 0; i < NumNodes; i++) {
-			//Vector2 newPosition = Vector3.Lerp(lastRailSpawnPosition, currentPosition, i / ((float)(NumNodes - 1)));
-			Vector2 newPosition = Utils.QuadraticBezier(lastRailSpawnPosition, currentPosition, pivot, i / ((float)(NumNodes - 1)));
-			positions[i] = newPosition;
-		
-			Vector2 rd, normal;
-			if( i > 0 ) {
-				rd = (newPosition - lastPosition).normalized;
-				normal = rd.Rotate(90);			
-				Nodes[i-1] = new RailNode(i, newPosition, rd, normal );
+		RailNode lastNode = parentRail.LastNode;
+		Vector2 lastPosition = lastRailSpawnPosition;
+
+		Vector2 pivot;
+		if (lastNode != RailNode.Invalid) {
+			pivot = lastRailSpawnPosition + lastNode.Direction * totalDistance;
+		}
+		else {
+			Vector2 center = (currentPosition + lastRailSpawnPosition) / 2f;
+			Vector2 overallNormal = ((Vector2)(currentPosition - lastRailSpawnPosition).normalized).Rotate(90);
+			pivot = center + overallNormal * -Mathf.Sign(spawnAngleDiff) * distFactor * Mathf.Pow(spawnAngleDiff / 29f, 4);
+		}	
+
+		for (int i = 0; i < NumNodes; i++) {	
+			Vector2 rd, normal, newPosition;
+			float pct = i / ((float)(NumNodes - 1));	
+
+			if (lastNode != RailNode.Invalid) {
+				newPosition = Vector2.Lerp(lastRailSpawnPosition, currentPosition, pct) * pct +
+								Vector2.Lerp(lastRailSpawnPosition, pivot, pct) * (1-pct) ;
 			}
 			else {
-				if( parentRail.LastNode != RailNode.Invalid ) {
-					rd = parentRail.LastNode.Direction;
-					normal = parentRail.LastNode.Normal;
-				}
-				else {
-					Vector2 nextPosition = Vector3.Lerp(lastRailSpawnPosition, currentPosition, (i+1) / ((float)(NumNodes - 1)));
-					rd = (nextPosition - newPosition).normalized;
-					normal = rd.Rotate(90);
-				}	
+				newPosition = Utils.QuadraticBezier(lastRailSpawnPosition, currentPosition, pivot, pct);
+			}		
+			positions[i] = newPosition;
+
+			if (i > 0) {
+				rd = (newPosition - lastPosition).normalized;
+				normal = rd.Rotate(90);
+				Nodes[i - 1] = new RailNode(i, newPosition, rd, normal);
+			} else {
+				rd = lastNode.Direction;
+				normal = lastNode.Normal;
 			}
 
 			vertices[i] = newPosition + normal * Width;
@@ -138,8 +144,8 @@ public class RailSegment : PoolObject {
 			pcPoints[i] = newPosition + normal * Width * 1.2f;
 			pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * Width * 1.2f;
 
-			Debug.DrawRay(newPosition, rd, Color.green, 1);
-			Debug.DrawRay(newPosition, normal, Color.cyan, 1);
+			//Debug.DrawRay(newPosition, rd/2f, Color.green, 2);
+			//Debug.DrawRay(newPosition, normal, Color.cyan, 2);
 
 			lastPosition = newPosition;
 		}
