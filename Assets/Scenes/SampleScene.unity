@@ -361,7 +361,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 534669902}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: -38, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -378,8 +378,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b5a0fc315b90c54484112dd0fe5d505, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 1642520756}
-  rm: {fileID: 0}
+  AttachedRail: {fileID: 988926076}
+  MaxSpeed: 20
+  RailIndex: 0
 --- !u!1001 &686300596
 Prefab:
   m_ObjectHideFlags: 0
@@ -442,7 +443,7 @@ Prefab:
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
       propertyPath: m_Points.m_Paths.Array.data[0].Array.data[0].x
-      value: -35
+      value: -60
       objectReference: {fileID: 0}
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
@@ -452,7 +453,7 @@ Prefab:
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
       propertyPath: m_Points.m_Paths.Array.data[0].Array.data[1].x
-      value: -35
+      value: -60
       objectReference: {fileID: 0}
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
@@ -642,7 +643,7 @@ Prefab:
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
       propertyPath: m_Points.m_Paths.Array.data[0].Array.data[0].x
-      value: -35
+      value: -60
       objectReference: {fileID: 0}
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
@@ -652,7 +653,7 @@ Prefab:
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
       propertyPath: m_Points.m_Paths.Array.data[0].Array.data[1].x
-      value: -35
+      value: -60
       objectReference: {fileID: 0}
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
@@ -846,7 +847,7 @@ Prefab:
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
       propertyPath: m_Points.m_Paths.Array.data[0].Array.data[0].x
-      value: -35
+      value: -60
       objectReference: {fileID: 0}
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
@@ -856,7 +857,7 @@ Prefab:
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
       propertyPath: m_Points.m_Paths.Array.data[0].Array.data[1].x
-      value: -35
+      value: -60
       objectReference: {fileID: 0}
     - target: {fileID: 60299624410843800, guid: f7a65a1ec4c967048b2684d16118ade5,
         type: 2}
@@ -1046,7 +1047,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1642520755}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -17.5, y: 0, z: 0}
+  m_LocalPosition: {x: -53, y: 0, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

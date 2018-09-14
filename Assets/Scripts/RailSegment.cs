@@ -32,18 +32,19 @@ public class RailSegment : PoolObject {
 	}
 
 	public void OnEnable() {
+		pc.enabled = true;
 		if (InitialRailSegment) {
 			Nodes = new RailNode[1];
-			killTime = Time.time + 10f;	
+			killTime = Time.time + 15f;	
 			Nodes[0] = new RailNode(new Vector3(35, parentRail.transform.position.y), Vector3.right, Vector3.up);
 			InitialRailSegment = false;
 
 			Mesh m = new Mesh();
 			m.vertices = new Vector3[] {
-				new Vector3(-35, parentRail.transform.position.y + Width),
+				new Vector3(-60, parentRail.transform.position.y + Width),
 				new Vector3(35, parentRail.transform.position.y + Width),
 				new Vector3(35, parentRail.transform.position.y - Width),
-				new Vector3(-35, parentRail.transform.position.y - Width)			
+				new Vector3(-60, parentRail.transform.position.y - Width)			
 			};
 			m.uv = new Vector2[] {
 				new Vector2(0, 1),
@@ -59,13 +60,17 @@ public class RailSegment : PoolObject {
 			mf.sharedMesh = m;
 		}
 		else {
-			killTime = Time.time + 5f;
+			killTime = Time.time + 10f;
 		}
 		NumNodes = 30;
 	}
 
 	public void Update() {
-		if( Time.time > killTime ) {
+		float time = Time.time;
+		if ( pc.enabled && Time.time > (killTime - 5f) ) {
+			pc.enabled = false;
+		}
+		else if ( Time.time > killTime ) {
 			Recycle();
 		}
 	}
@@ -107,7 +112,7 @@ public class RailSegment : PoolObject {
 		Vector2 lastPosition = lastRailSpawnPosition;
 
 		Vector2 pivot;
-		if (lastNode != RailNode.Invalid) {
+		if (lastNode.Valid) {
 			pivot = lastRailSpawnPosition + lastNode.Direction * totalDistance;
 		}
 		else {
@@ -120,7 +125,7 @@ public class RailSegment : PoolObject {
 			Vector2 rd, normal, newPosition;
 			float pct = i / ((float)(NumNodes - 1));	
 
-			if (lastNode != RailNode.Invalid) {
+			if (lastNode.Valid) {
 				newPosition = Vector2.Lerp(lastRailSpawnPosition, currentPosition, pct) * pct +
 								Vector2.Lerp(lastRailSpawnPosition, pivot, pct) * (1-pct) ;
 			}
@@ -134,8 +139,15 @@ public class RailSegment : PoolObject {
 				normal = rd.Rotate(90);
 				Nodes[i - 1] = new RailNode(i, newPosition, rd, normal);
 			} else {
-				rd = lastNode.Direction;
-				normal = lastNode.Normal;
+				if (lastNode.Valid) {
+					rd = lastNode.Direction;
+					normal = lastNode.Normal;
+				}
+				else {
+					var nextPosition = Utils.QuadraticBezier(lastRailSpawnPosition, currentPosition, pivot, pct + (1 / ((float)NumNodes - 1)));
+					rd = (nextPosition - newPosition).normalized;
+					normal = rd.Rotate(90);
+				}
 			}
 
 			vertices[i] = newPosition + normal * Width;

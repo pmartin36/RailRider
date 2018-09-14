@@ -33,6 +33,12 @@ public class Rail : MonoBehaviour {
 		}
 	}
 
+	public int NodeCount {
+		get {
+			return nodes.Count;
+		}
+	}
+
 	// Use this for initialization
 	void Awake () {
 		railManager = GetComponentInParent<RailManager>();
@@ -63,7 +69,9 @@ public class Rail : MonoBehaviour {
 		}
 		else {
 			previousRailSegment = null;
-			nodes.Add(RailNode.Invalid);
+			Vector2 rd =  (transform.position - lastRailSpawnPosition).normalized;
+			Vector2 normal = rd.Rotate(90);
+			nodes.Add(new RailNode(0, transform.position, rd, normal, false));
 			lastRailSpawnPosition = transform.position;
 		}
 	}
@@ -88,9 +96,17 @@ public class Rail : MonoBehaviour {
 
 	// player just hopped on rail
 	public int GetTargetIndex(List<RailSegment> rs, Vector3 collisionPosition) {
-		var rnodes = rs.SelectMany( r => r.Nodes );
-		var sortedNodes = rnodes.OrderBy( n => Vector2.Distance(n.Position, collisionPosition) ).ToList();
-		RailNode selectedNode = sortedNodes.Count > 1 && sortedNodes[1].index > sortedNodes[0].index ?  sortedNodes[1] : sortedNodes[0];
+		var rnodes = rs.SelectMany( r => r.Nodes ).ToArray();
+		return GetTargetFromNodes(rnodes, collisionPosition);
+	}
+
+	public int GetTargetIndex(RailSegment rs, Vector3 collisionPosition) {
+		return GetTargetFromNodes(rs.Nodes, collisionPosition);
+	}
+
+	private int GetTargetFromNodes(RailNode[] rnodes, Vector3 collisionPosition) {
+		var sortedNodes = rnodes.OrderBy(n => Vector2.Distance(n.Position, collisionPosition)).ToList();
+		RailNode selectedNode = sortedNodes.Count > 1 && sortedNodes[1].index > sortedNodes[0].index ? sortedNodes[1] : sortedNodes[0];
 
 		var nodeIndex = nodes.LastIndexOf(selectedNode);
 		return nodeIndex < 0 ? 0 : nodeIndex;

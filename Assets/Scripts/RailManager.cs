@@ -25,6 +25,7 @@ public class RailManager : MonoBehaviour {
 	private float spawnAngle;
 
 	void Start () {
+		GameManager.Instance.RailManager = this;
 		Rails = GetComponentsInChildren<Rail>().ToList();
 
 		lastRailSpawnTime = Time.time;
@@ -38,6 +39,15 @@ public class RailManager : MonoBehaviour {
 	public void SetRailSpawnTimes() {
 		TimeBetweenRailSpawns = RailSize / RailSpeed;
 	}
+
+	public Rail GetAnotherRail(Rail r) {	
+		Rail rail;
+		do {
+			int random = Random.Range(0, Rails.Count);
+			rail = Rails[random];
+		} while(rail == r);
+		return rail;
+	}
 	
 	// Update is called once per frame
 	void Update () {
@@ -48,7 +58,7 @@ public class RailManager : MonoBehaviour {
 
 		if(percent >= 1) {
 			var lastSpawnAngle = spawnAngle;
-			spawnAngle +=  Perlin.Noise(Time.time/5f) * 40;
+			spawnAngle +=  Perlin.Noise(Time.time/5f) * 30 - 15;
 			var diff = spawnAngle - lastSpawnAngle;
 
 			transform.Rotate(0, 0, diff);

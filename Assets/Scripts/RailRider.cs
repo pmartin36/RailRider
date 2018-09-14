@@ -15,6 +15,7 @@ public class RailRider : MonoBehaviour {
 	protected float GravitySpeed;
 	protected float Gravity;
 	protected Vector3 GravityDirection;
+	protected Coroutine centerOnRailRoutine;
 
 	public int RailIndex;
 
@@ -36,44 +37,52 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void Update() {
 		if(AttachedRail == null) {
-			GravitySpeed = Mathf.Min(GravitySpeed + Gravity * Time.deltaTime, MaxSpeed);
-
-			var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
-			var newPosition = transform.position + diff * Time.deltaTime;
-
-			var viewportPosition = mainCamera.WorldToViewportPoint(newPosition);
-			//if( (viewportPosition.x > 1 && diff.x > 0) ||
-			//	(viewportPosition.x < 0 && diff.x < 0)) {
-			//	newPosition.x *= -1;
-			//}
-			if( (viewportPosition.y > 1 && diff.y > 0) || 
-				(viewportPosition.y < 0 && diff.y < 0)) {
-				newPosition.y *= -1;
-			}
-
-			transform.position = newPosition;
+			FreeMovement();
 		}
 		else {
-			float movement = RailSpeed * Time.deltaTime;
-			while (AttachedRail != null && movement > 0) {
-				if (distanceToTarget > movement) {
-					transform.position += target.Direction * movement;
-					distanceToTarget -= movement;
-					movement = 0;
-				}
-				else {
-					movement -= distanceToTarget;
-					transform.position += target.Direction * distanceToTarget;
-					RailIndex++;
-					SetTarget();
-				}
+			RailMovement();
+		}
+	}
+
+	public virtual void FreeMovement() {
+		GravitySpeed = Mathf.Min(GravitySpeed + Gravity * Time.deltaTime, MaxSpeed);
+
+		var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
+		var newPosition = transform.position + diff * Time.deltaTime;
+
+		var viewportPosition = mainCamera.WorldToViewportPoint(newPosition);
+		//if( (viewportPosition.x > 1 && diff.x > 0) ||
+		//	(viewportPosition.x < 0 && diff.x < 0)) {
+		//	newPosition.x *= -1;
+		//}
+		if ((viewportPosition.y > 1 && diff.y > 0) ||
+			(viewportPosition.y < 0 && diff.y < 0)) {
+			newPosition.y *= -1;
+		}
+
+		transform.position = newPosition;
+	}
+
+	public virtual void RailMovement() {
+		float movement = RailSpeed * Time.deltaTime;
+		while (AttachedRail != null && movement > 0) {
+			if (distanceToTarget > movement) {
+				transform.position += target.Direction * movement;
+				distanceToTarget -= movement;
+				movement = 0;
+			}
+			else {
+				movement -= distanceToTarget;
+				transform.position += target.Direction * distanceToTarget;
+				RailIndex++;
+				SetTarget();
 			}
 		}
 	}
 
-	public void SetTarget() {
+	public virtual void SetTarget() {
 		RailNode nextPosition = AttachedRail.GetTargetRailNode(RailIndex);
-		if (nextPosition != RailNode.Invalid) {
+		if (nextPosition.Valid) {
 			target = nextPosition;
 
 			var dist = Vector2.Distance(transform.position, target.Position);
@@ -101,11 +110,12 @@ public class RailRider : MonoBehaviour {
 			RailIndex = AttachedRail.GetTargetIndex(railSegments, transform.position);
 			SetTarget();
 
-			StartCoroutine(CenterOnRail());
+			if(centerOnRailRoutine != null) StopCoroutine(centerOnRailRoutine);
+			centerOnRailRoutine = StartCoroutine(CenterOnRail());
 		}
 	}
 
-	public void DisconnectFromRail() {
+	public virtual void DisconnectFromRail() {
 		AttachedRail.NodesRemoved -= RailRemovedNodes;
 		AttachedRail = null;
 	}
@@ -126,7 +136,7 @@ public class RailRider : MonoBehaviour {
 		}
 	}
 
-	IEnumerator CenterOnRail() {
+	protected virtual IEnumerator CenterOnRail() {
 		float movement = 2f * Time.deltaTime * Mathf.Sign(distanceToCenter);
 		while (AttachedRail != null && target != null) {		
 			if( Mathf.Abs(movement) > Mathf.Abs(distanceToCenter) ) {

@@ -10,6 +10,7 @@ public class GameManager : Singleton<GameManager> {
 
 	public bool Menu { get; set; }
 	public Player Player;
+	public RailManager RailManager;
 
 
 	public void Awake() {
