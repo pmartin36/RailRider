@@ -31,9 +31,21 @@ public class RailManager : MonoBehaviour {
 		lastRailSpawnTime = Time.time;
 		numRailsSinceLastCorruption = 0;
 		lastRailSpawnPosition = transform.position;
-		nextRailSpawnPosition = lastRailSpawnPosition + Vector3.right * RailSize;
-
+		
 		SetRailSpawnTimes();
+
+		var y = transform.position.y;
+		for (int x = -45; x < 45; x += 15) {
+			float kt = (1f / 22f) * x + 7;
+			transform.position = new Vector3(x, y);
+
+			for (int i = 0; i < Rails.Count; i++) {
+				Rails[i].SpawnRail(1, RailSize, 0, kt);
+			}
+
+			lastRailSpawnPosition = this.transform.position;
+		}
+		nextRailSpawnPosition = lastRailSpawnPosition + Vector3.right * RailSize;
 	}
 
 	public void SetRailSpawnTimes() {

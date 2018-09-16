@@ -33,41 +33,16 @@ public class RailSegment : PoolObject {
 
 	public void OnEnable() {
 		pc.enabled = true;
-		if (InitialRailSegment) {
-			Nodes = new RailNode[1];
-			killTime = Time.time + 15f;	
-			Nodes[0] = new RailNode(new Vector3(35, parentRail.transform.position.y), Vector3.right, Vector3.up);
-			InitialRailSegment = false;
+	}
 
-			Mesh m = new Mesh();
-			m.vertices = new Vector3[] {
-				new Vector3(-60, parentRail.transform.position.y + Width),
-				new Vector3(35, parentRail.transform.position.y + Width),
-				new Vector3(35, parentRail.transform.position.y - Width),
-				new Vector3(-60, parentRail.transform.position.y - Width)			
-			};
-			m.uv = new Vector2[] {
-				new Vector2(0, 1),
-				new Vector2(1, 1),
-				new Vector2(1, 0),
-				new Vector2(0, 0)
-			};
-			m.triangles = new int[] {
-				0, 1, 3,
-				2, 3, 1
-			};
-			m.RecalculateNormals();
-			mf.sharedMesh = m;
-		}
-		else {
-			killTime = Time.time + 10f;
-		}
-		NumNodes = 30;
+	public void Init(float ktime) {
+		pc.enabled = true;
+		killTime = Time.time + ktime;
 	}
 
 	public void Update() {
 		float time = Time.time;
-		if ( pc.enabled && Time.time > (killTime - 5f) ) {
+		if ( pc.enabled && Time.time > (killTime - 4f) ) {
 			pc.enabled = false;
 		}
 		else if ( Time.time > killTime ) {
@@ -108,11 +83,12 @@ public class RailSegment : PoolObject {
 		Vector3[] positions = new Vector3[ NumNodes ];
 		Vector3[] vertices = new Vector3[NumNodes * 2];
 
-		RailNode lastNode = parentRail.LastNode;
+		RailNode lastNode = parentRail?.LastNode;
+		bool lastNodeValid = lastNode != null && lastNode.Valid;
 		Vector2 lastPosition = lastRailSpawnPosition;
 
 		Vector2 pivot;
-		if (lastNode.Valid) {
+		if (lastNodeValid) {
 			pivot = lastRailSpawnPosition + lastNode.Direction * totalDistance;
 		}
 		else {
@@ -125,7 +101,7 @@ public class RailSegment : PoolObject {
 			Vector2 rd, normal, newPosition;
 			float pct = i / ((float)(NumNodes - 1));	
 
-			if (lastNode.Valid) {
+			if (lastNodeValid) {
 				newPosition = Vector2.Lerp(lastRailSpawnPosition, currentPosition, pct) * pct +
 								Vector2.Lerp(lastRailSpawnPosition, pivot, pct) * (1-pct) ;
 			}
@@ -139,7 +115,7 @@ public class RailSegment : PoolObject {
 				normal = rd.Rotate(90);
 				Nodes[i - 1] = new RailNode(i, newPosition, rd, normal);
 			} else {
-				if (lastNode.Valid) {
+				if (lastNodeValid) {
 					rd = lastNode.Direction;
 					normal = lastNode.Normal;
 				}

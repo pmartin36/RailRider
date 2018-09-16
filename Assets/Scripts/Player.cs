@@ -35,10 +35,7 @@ public class Player : RailRider {
 		if (AttachedRail == null) {
 			if (p.Right || p.Left) {
 				//should probably use nonAlloc version - fix later for performance
-				Collider2D[] rails = Physics2D.OverlapCircleAll(transform.position, cc.radius, 1 << LayerMask.NameToLayer("Rail"));
-				if(rails.Length > 0) {
-					ConnectToRail( rails.Select( r => r.gameObject.GetComponent<RailSegment>()).ToList() );
-				}
+				ConnectToRailByOverlap(cc.radius);
 			}
 		}
 	}

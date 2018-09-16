@@ -25,11 +25,9 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void Start () {
 		RailIndex = 0;
-		ConnectToRail(AttachedRail);
-		SetTarget();
-
 		RailSpeed = MaxSpeed;
 		Gravity = 15f;
+		StartCoroutine(DelayedInit());
 
 		mainCamera = Camera.main;
 		cc = GetComponent<CircleCollider2D>();
@@ -115,6 +113,13 @@ public class RailRider : MonoBehaviour {
 		}
 	}
 
+	protected void ConnectToRailByOverlap(float radius = 0.25f) {
+		Collider2D[] rails = Physics2D.OverlapCircleAll(transform.position, radius, 1 << LayerMask.NameToLayer("Rail"));
+		if (rails.Length > 0) {
+			ConnectToRail(rails.Select(r => r.gameObject.GetComponent<RailSegment>()).ToList());
+		}
+	}
+
 	public virtual void DisconnectFromRail() {
 		AttachedRail.NodesRemoved -= RailRemovedNodes;
 		AttachedRail = null;
@@ -149,5 +154,10 @@ public class RailRider : MonoBehaviour {
 			}
 			yield return new WaitForEndOfFrame();
 		}
+	}
+
+	protected IEnumerator DelayedInit() {
+		yield return new WaitForEndOfFrame();
+		ConnectToRailByOverlap();
 	}
 }

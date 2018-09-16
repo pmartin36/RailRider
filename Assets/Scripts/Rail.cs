@@ -29,7 +29,7 @@ public class Rail : MonoBehaviour {
 
 	public RailNode LastNode {
 		get {
-			return nodes.Last();
+			return nodes.LastOrDefault();
 		}
 	}
 
@@ -41,22 +41,25 @@ public class Rail : MonoBehaviour {
 
 	// Use this for initialization
 	void Awake () {
-		railManager = GetComponentInParent<RailManager>();
 		lastRailSpawnPosition = transform.position;
+		railManager = GetComponentInParent<RailManager>();
 		seed = UnityEngine.Random.Range(0, 1000000);
 		nodes = new List<RailNode>();
-		nodes.Add(new RailNode(new Vector2(35, transform.position.y), Vector3.right, Vector3.up));
 	}
-	
+
+	private void Start() {
+
+	}
+
 	// Update is called once per frame
 	void Update () {
 		
 	}
 
-	public void SpawnRail(float density, float size, float spawnAngleDiff) {
+	public void SpawnRail(float density, float size, float spawnAngleDiff, float killTime = 10f) {
 		var isCorrupted = UnityEngine.Random.value <= corruptedRailOverrideChance;
 		if (isCorrupted || Perlin.Noise01(Time.time * 5 + seed) <= density) {
-			RailSegment r = CreateRailSegment(size, spawnAngleDiff);
+			RailSegment r = CreateRailSegment(size, spawnAngleDiff, killTime);
 
 			if( isCorrupted ) {
 				r.SetCorrupted(true);
@@ -83,10 +86,11 @@ public class Rail : MonoBehaviour {
 		previousRailSegment = r;
 	}
 
-	private RailSegment CreateRailSegment(float size, float spawnAngleDiff) {
+	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, float killTime = 10f) {
 		RailSegment r = RailSegment.Create();
 		r.parentRail = this;
-		var newNodes = r.CalculateNodes(size, spawnAngleDiff, lastRailSpawnPosition, this.transform.position);
+		r.Init(killTime);
+		var newNodes = r.CalculateNodes(size, spawnAngleDiff, lastRailSpawnPosition, this.transform.position);		
 		nodes.AddRange(newNodes);
 
 		previousRailSegment = r;
