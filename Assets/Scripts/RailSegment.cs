@@ -16,12 +16,14 @@ public class RailSegment : PoolObject {
 
 	[Range(2,100)]
 	public int NumNodes;
+	public int ModifiedNumNodes;
 	public bool InitialRailSegment;
 	private float killTime;
 
 	private PolygonCollider2D pc;
 
 	public RailNode[] Nodes;
+	public int SegmentIndex;
 
 	public void Awake() {
 		RailSegmentContainer = RailSegmentContainer ?? GameObject.FindGameObjectWithTag("SegmentContainer");
@@ -73,15 +75,16 @@ public class RailSegment : PoolObject {
 	}
 
 
-	public RailNode[] CalculateNodes(float size, float spawnAngleDiff, Vector3 lastRailSpawnPosition, Vector3 currentPosition) {
+	public RailNode[] CalculateNodes(float size, float spawnAngleDiff, Vector3 lastRailSpawnPosition, Vector3 currentPosition, int segIndex) {
+		SegmentIndex = segIndex;
 		float totalDistance = Vector3.Distance(lastRailSpawnPosition, currentPosition);
 		float distFactor = (totalDistance / size);
-		NumNodes = (int)(NumNodes * distFactor);
+		ModifiedNumNodes = (int)(NumNodes * distFactor);
 
-		Nodes = new RailNode[NumNodes - 1];
-		Vector2[] pcPoints = new Vector2[NumNodes * 2 ];
-		Vector3[] positions = new Vector3[ NumNodes ];
-		Vector3[] vertices = new Vector3[NumNodes * 2];
+		Nodes = new RailNode[ModifiedNumNodes - 1];
+		Vector2[] pcPoints = new Vector2[ModifiedNumNodes * 2 ];
+		Vector3[] positions = new Vector3[ModifiedNumNodes];
+		Vector3[] vertices = new Vector3[ModifiedNumNodes * 2];
 
 		RailNode lastNode = parentRail?.LastNode;
 		bool lastNodeValid = lastNode != null && lastNode.Valid;
@@ -97,9 +100,9 @@ public class RailSegment : PoolObject {
 			pivot = center + overallNormal * distFactor * -Mathf.Pow(spawnAngleDiff / 25f, 3);
 		}	
 
-		for (int i = 0; i < NumNodes; i++) {	
+		for (int i = 0; i < ModifiedNumNodes; i++) {	
 			Vector2 rd, normal, newPosition;
-			float pct = i / ((float)(NumNodes - 1));	
+			float pct = i / ((float)(ModifiedNumNodes - 1));	
 
 			if (lastNodeValid) {
 				newPosition = Vector2.Lerp(lastRailSpawnPosition, currentPosition, pct) * pct +
@@ -113,21 +116,21 @@ public class RailSegment : PoolObject {
 			if (i > 0) {
 				rd = (newPosition - lastPosition).normalized;
 				normal = rd.Rotate(90);
-				Nodes[i - 1] = new RailNode(i, newPosition, rd, normal);
+				Nodes[i - 1] = new RailNode(segIndex, i, newPosition, rd, normal, true);
 			} else {
 				if (lastNodeValid) {
 					rd = lastNode.Direction;
 					normal = lastNode.Normal;
 				}
 				else {
-					var nextPosition = Utils.QuadraticBezier(lastRailSpawnPosition, currentPosition, pivot, pct + (1 / ((float)NumNodes - 1)));
+					var nextPosition = Utils.QuadraticBezier(lastRailSpawnPosition, currentPosition, pivot, pct + (1 / ((float)ModifiedNumNodes - 1)));
 					rd = (nextPosition - newPosition).normalized;
 					normal = rd.Rotate(90);
 				}
 			}
 
 			vertices[i] = newPosition + normal * Width;
-			vertices[i + NumNodes] = newPosition - normal * Width;
+			vertices[i + ModifiedNumNodes] = newPosition - normal * Width;
 
 			pcPoints[i] = newPosition + normal * Width * 1.2f;
 			pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * Width * 1.2f;
@@ -144,10 +147,10 @@ public class RailSegment : PoolObject {
 		m.vertices = vertices;
 		//m.uv = 
 		List <int> tris = new List<int>();
-		for(int i = 0; i < NumNodes - 1; i++) {
+		for(int i = 0; i < ModifiedNumNodes - 1; i++) {
 			tris.AddRange(new int [] {
-				i, i+1, i+NumNodes,
-				i+NumNodes+1, i+NumNodes, i+1
+				i, i+1, i+ModifiedNumNodes,
+				i+ModifiedNumNodes+1, i+ModifiedNumNodes, i+1
 			});
 		}
 		m.triangles = tris.ToArray();
@@ -159,7 +162,7 @@ public class RailSegment : PoolObject {
 	}
 
 	public override void Recycle() {
-		parentRail.RemoveNodes(NumNodes-1);
+		parentRail.RemoveNodes(ModifiedNumNodes-1);
 		base.Recycle();
 	}
 }

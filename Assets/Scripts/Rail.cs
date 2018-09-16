@@ -56,10 +56,10 @@ public class Rail : MonoBehaviour {
 		
 	}
 
-	public void SpawnRail(float density, float size, float spawnAngleDiff, float killTime = 10f) {
+	public void SpawnRail(float density, float size, float spawnAngleDiff, int segIndex, float killTime = 10f) {
 		var isCorrupted = UnityEngine.Random.value <= corruptedRailOverrideChance;
 		if (isCorrupted || Perlin.Noise01(Time.time * 5 + seed) <= density) {
-			RailSegment r = CreateRailSegment(size, spawnAngleDiff, killTime);
+			RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex, killTime);
 
 			if( isCorrupted ) {
 				r.SetCorrupted(true);
@@ -74,23 +74,23 @@ public class Rail : MonoBehaviour {
 			previousRailSegment = null;
 			Vector2 rd =  (transform.position - lastRailSpawnPosition).normalized;
 			Vector2 normal = rd.Rotate(90);
-			nodes.Add(new RailNode(0, transform.position, rd, normal, false));
+			nodes.Add(new RailNode(segIndex, 0, transform.position, rd, normal, false));
 			lastRailSpawnPosition = transform.position;
 		}
 	}
 
-	public void SpawnCorruptedRail(float size, float spawnAngleDiff) {
-		RailSegment r = CreateRailSegment(size, spawnAngleDiff);
+	public void SpawnCorruptedRail(float size, float spawnAngleDiff, int segIndex) {
+		RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex);
 		r.SetCorrupted(true);
 		corruptedRailOverrideChance = 0.8f;
 		previousRailSegment = r;
 	}
 
-	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, float killTime = 10f) {
+	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, int segIndex, float killTime = 10f) {
 		RailSegment r = RailSegment.Create();
 		r.parentRail = this;
 		r.Init(killTime);
-		var newNodes = r.CalculateNodes(size, spawnAngleDiff, lastRailSpawnPosition, this.transform.position);		
+		var newNodes = r.CalculateNodes(size, spawnAngleDiff, lastRailSpawnPosition, this.transform.position, segIndex);		
 		nodes.AddRange(newNodes);
 
 		previousRailSegment = r;

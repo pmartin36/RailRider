@@ -7,6 +7,7 @@ public class CameraAnchor : RailRider {
 
 	float targetRotation;
 	float currentRotation;
+	private float segmentIndex = 0;
 
 	// Use this for initialization
 	public override void Start () {
@@ -14,46 +15,21 @@ public class CameraAnchor : RailRider {
 		currentRotation = 0f;
 	}
 
-	public override void DisconnectFromRail() {
-		var nextRailIndex = RailIndex;
-		var nextTarget = AttachedRail.GetTargetRailNode(nextRailIndex);
-		Rail nextRail = AttachedRail;
-		float rayDist = 20;
+	public override void SetTarget() {
+		RailNode nextPosition = AttachedRail.GetTargetRailNode(RailIndex);
+		target = nextPosition;
 
-		base.DisconnectFromRail();
+		var dist = Vector2.Distance(transform.position, target.Position);
+		var angle = Vector2.SignedAngle(transform.position - target.Position, target.Direction) * Mathf.Deg2Rad;
 
-		do {
-			List<RaycastHit2D> hits = Physics2D.RaycastAll(nextTarget.Position - nextTarget.Normal * rayDist/2f, nextTarget.Normal, rayDist, 1 << LayerMask.NameToLayer("Rail"))
-										.Where(r => r.collider != null)
-										.OrderBy(r => Vector2.Distance(r.point, transform.position)).ToList();
-			Debug.DrawRay(nextTarget.Position - nextTarget.Normal * rayDist/2f, nextTarget.Normal * rayDist, Color.yellow, 3f);
-			if(hits.Count > 0) {
-				RaycastHit2D hit = hits[0];
-				RailSegment seg = hits[0].collider.GetComponent<RailSegment>();
-				nextRail = seg.parentRail;			
-				nextRailIndex = nextRail.GetTargetIndex(seg, hit.point);
-			}
-			else {
-				nextRailIndex++;
-			}
+		distanceToTarget = dist * Mathf.Abs(Mathf.Cos(angle));
+		distanceToCenter = dist * Mathf.Sin(angle);
+		//transform.localRotation = Quaternion.Euler(0,0,Utils.VectorToAngle(target.Direction));
 
-			nextTarget = nextRail.GetTargetRailNode(nextRailIndex);
-		}  while (nextRailIndex < nextRail.NodeCount && !nextTarget.Valid);
-
-		if(nextRailIndex >= nextRail.NodeCount) {
-			Debug.Log("We didn't find any rails???");
-			return;
+		while (target.SegmentIndex > this.segmentIndex) {
+			segmentIndex++;
+			GameManager.Instance.RailManager.AddRail();
 		}
-		else {
-			Debug.Log(nextTarget.Position);
-			Debug.Log(nextRail.gameObject.name);
-		}
-
-		ConnectToRail(nextRail);
-		RailIndex = nextRailIndex;
-		SetTarget();
-		if (centerOnRailRoutine != null) StopCoroutine(centerOnRailRoutine);
-		centerOnRailRoutine = StartCoroutine(CenterOnRail());
 	}
 
 	public override void Update() {

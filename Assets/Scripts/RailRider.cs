@@ -101,7 +101,7 @@ public class RailRider : MonoBehaviour {
 		AttachedRail.NodesRemoved += RailRemovedNodes;
 	}
 
-	public void ConnectToRail(List<RailSegment> railSegments) {
+	public virtual void ConnectToRail(List<RailSegment> railSegments) {
 		Rail r = railSegments.FirstOrDefault()?.parentRail;
 		if (r != null) {
 			ConnectToRail(r);
@@ -114,9 +114,11 @@ public class RailRider : MonoBehaviour {
 	}
 
 	protected void ConnectToRailByOverlap(float radius = 0.25f) {
-		Collider2D[] rails = Physics2D.OverlapCircleAll(transform.position, radius, 1 << LayerMask.NameToLayer("Rail"));
-		if (rails.Length > 0) {
-			ConnectToRail(rails.Select(r => r.gameObject.GetComponent<RailSegment>()).ToList());
+		List<RailSegment> rails = Physics2D.OverlapCircleAll(transform.position, radius, 1 << LayerMask.NameToLayer("Rail"))
+								.Select(r => r?.gameObject.GetComponent<RailSegment>())
+								.Where(r => r != null && r.SegmentIndex >= target.SegmentIndex).ToList();
+		if (rails.Count > 0) {
+			ConnectToRail(rails);
 		}
 	}
 
