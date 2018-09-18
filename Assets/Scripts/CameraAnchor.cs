@@ -5,14 +5,15 @@ using System.Linq;
 
 public class CameraAnchor : RailRider {
 
-	float targetRotation;
-	float currentRotation;
+	Vector2 targetRotation;
+	Vector2 currentRotation;
+
 	private float segmentIndex = 0;
 
 	// Use this for initialization
 	public override void Start () {
 		base.Start();
-		currentRotation = 0f;
+		currentRotation = Vector2.right;
 	}
 
 	public override void SetTarget() {
@@ -24,7 +25,7 @@ public class CameraAnchor : RailRider {
 
 		distanceToTarget = dist * Mathf.Abs(Mathf.Cos(angle));
 		distanceToCenter = dist * Mathf.Sin(angle);
-		//transform.localRotation = Quaternion.Euler(0,0,Utils.VectorToAngle(target.Direction));
+		targetRotation = target.Direction;
 
 		while (target.SegmentIndex > this.segmentIndex) {
 			segmentIndex++;
@@ -33,6 +34,11 @@ public class CameraAnchor : RailRider {
 	}
 
 	public override void Update() {
+		var diff = Vector2.SignedAngle(currentRotation, targetRotation) * 2 * Time.deltaTime;
+		currentRotation = currentRotation.Rotate(diff);
+		Debug.Log(diff);
+		Debug.Log(currentRotation);
+		transform.localRotation = Quaternion.Euler(0,0,Utils.VectorToAngle(currentRotation));
 		base.Update();
 	}
 }

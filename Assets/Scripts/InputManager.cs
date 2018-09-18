@@ -4,10 +4,7 @@ using UnityEngine;
 
 public class InputPackage {
 	public float Vertical { get; set; }
-
-	public bool Left { get; set; }
-	public bool Right { get; set; }
-
+	public float Horizontal { get; set; }
 	public bool Jump { get; set; }
 
 	public bool Quit { get; set; }
@@ -26,17 +23,8 @@ public class InputManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		package.Vertical = Input.GetAxis("Vertical");
-
+		package.Horizontal = Input.GetAxis("Horizontal");
 		package.Jump = Input.GetButtonDown("Jump");
-		if ( Input.GetButton("Join") ) {
-			var j = Input.GetAxisRaw("Join");
-			package.Left = j < 0;
-			package.Right = j > 0;
-		}
-		else {
-			package.Left = false;
-			package.Right = false;
-		}
 
 		GameManager.Instance.ProcessInputs(package);
 	}

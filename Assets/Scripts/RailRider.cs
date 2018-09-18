@@ -9,9 +9,10 @@ public class RailRider : MonoBehaviour {
 	public RailNode target = RailNode.Invalid;
 	protected float distanceToTarget;
 	protected float distanceToCenter;
-	public float MaxSpeed;
 
-	private float RailSpeed;
+	public float Speed;
+
+	protected float RailSpeed;
 	protected float GravitySpeed;
 	protected float Gravity;
 	protected Vector3 GravityDirection;
@@ -25,7 +26,7 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void Start () {
 		RailIndex = 0;
-		RailSpeed = MaxSpeed;
+		RailSpeed = Speed;
 		Gravity = 15f;
 		StartCoroutine(DelayedInit());
 
@@ -43,8 +44,9 @@ public class RailRider : MonoBehaviour {
 	}
 
 	public virtual void FreeMovement() {
-		GravitySpeed = Mathf.Min(GravitySpeed + Gravity * Time.deltaTime, MaxSpeed);
+		GravitySpeed = Mathf.Min(GravitySpeed + Gravity * Time.deltaTime, Speed);
 
+		//RailSpeed = 5 * Time.deltaTime;
 		var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
 		var newPosition = transform.position + diff * Time.deltaTime;
 
@@ -125,6 +127,7 @@ public class RailRider : MonoBehaviour {
 	public virtual void DisconnectFromRail() {
 		AttachedRail.NodesRemoved -= RailRemovedNodes;
 		AttachedRail = null;
+		RailSpeed = Mathf.Clamp(RailSpeed, Speed * 0.8f, Speed * 1.2f);
 	}
 
 	public void RailRemovedNodes(object sender, int numRemoved) {

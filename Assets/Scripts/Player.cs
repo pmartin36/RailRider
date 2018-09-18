@@ -16,24 +16,35 @@ public class Player : RailRider {
 	}
 
 	public void ProcessInputs(InputPackage p) {
-		if (p.Jump && AttachedRail != null) {
-			if(p.Vertical > 0.5f) {
-				GravityDirection = target.Normal;
+		Vector2 inputDirection = new Vector2(p.Horizontal, p.Vertical);
+		if (AttachedRail != null) {			
+			float angleBtwDirection = Vector2.SignedAngle( target.Direction, inputDirection );
+			float absAngle = Mathf.Abs(angleBtwDirection);
+			float tolerance = 45f;
+
+			if ( p.Jump && absAngle > 90 - tolerance && absAngle < 90 + tolerance) {
+				// jump
+				GravityDirection = Mathf.Sign(angleBtwDirection) * target.Normal;
 				GravitySpeed = 2f;
 				DisconnectFromRail();
+				
 			}
-			else if(p.Vertical < -0.5f) {
-				GravityDirection = -target.Normal;
-				GravitySpeed = 2f;
-				DisconnectFromRail();
-			}
+			else if( inputDirection.sqrMagnitude > 0.4f ) {
+				if (absAngle > 180 - tolerance) {
+					// slow down
+					RailSpeed = Speed * 0.4f;
+				}
+				else if (absAngle < tolerance) {
+					// speed up
+					RailSpeed = Speed * 1.75f;
+				}
+			}	
 			else {
-				// spin thing
+				RailSpeed = Speed;
 			}
 		}
-
-		if (AttachedRail == null) {
-			if (p.Right || p.Left) {
+		else  {
+			if (p.Jump) {
 				//should probably use nonAlloc version - fix later for performance
 				ConnectToRailByOverlap(cc.radius);
 			}
