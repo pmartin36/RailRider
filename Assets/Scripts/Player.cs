@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class Player : RailRider {
 
+	private Coroutine boundaryBump;
+
 	public override void Start () {
 		GameManager.Instance.Player = this;
 		base.Start();
@@ -17,45 +19,53 @@ public class Player : RailRider {
 
 	public void ProcessInputs(InputPackage p) {
 		Vector2 inputDirection = new Vector2(p.Horizontal, p.Vertical);
-		if (AttachedRail != null) {			
-			float angleBtwDirection = Vector2.SignedAngle( target.Direction, inputDirection );
-			float absAngle = Mathf.Abs(angleBtwDirection);
-			float tolerance = 45f;
-
-			if ( p.Jump && absAngle > 90 - tolerance && absAngle < 90 + tolerance) {
+		if (AttachedRail != null) {
+			if ( p.Jump && Mathf.Abs(p.Vertical) > 0.2f ) {
 				// jump
-				GravityDirection = Mathf.Sign(angleBtwDirection) * target.Normal;
-				GravitySpeed = 2f;
+				float direction = Mathf.Sign(p.Vertical);
+				Gravity = direction * Mathf.Abs(Gravity);
+				GravitySpeed = 2f * direction;
 				DisconnectFromRail();
 				
 			}
-			else if( inputDirection.sqrMagnitude > 0.4f ) {
-				if (absAngle > 180 - tolerance) {
+			else if( Mathf.Abs(p.Horizontal) > 0.2f ) {
+				if (p.Horizontal < 0) {
 					// slow down
-					RailSpeed = Speed * 0.4f;
+					targetSpeed = Speed * 0.4f;
 				}
-				else if (absAngle < tolerance) {
+				else {
 					// speed up
-					RailSpeed = Speed * 1.75f;
+					targetSpeed = Speed * 1.75f;
 				}
 			}	
 			else {
-				RailSpeed = Speed;
+				targetSpeed = Speed;
 			}
 		}
 		else  {
 			if (p.Jump) {
 				//should probably use nonAlloc version - fix later for performance
-				ConnectToRailByOverlap(cc.radius);
+				ConnectToRailByOverlap(cc.radius * 2f);
 			}
 		}
 	}
 
 	public override void OnTriggerEnter2D(Collider2D collision) {
-
+		if(collision.gameObject.tag == "ScreenBoundary") {
+			RailSpeed = Speed * 3f;
+			
+			StopCoroutine(RecoverFromBoundaryBump());
+			StartCoroutine(RecoverFromBoundaryBump());
+		}
 	}
 
 	public override void OnTriggerExit2D(Collider2D collision) {
 
+	}
+
+	private IEnumerator RecoverFromBoundaryBump() {
+		speedChangeDelta = 0.8f;
+		yield return new WaitForSeconds(0.5f);
+		speedChangeDelta = 0.2f;
 	}
 }

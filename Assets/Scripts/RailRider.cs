@@ -11,54 +11,69 @@ public class RailRider : MonoBehaviour {
 	protected float distanceToCenter;
 
 	public float Speed;
+	protected float targetSpeed;
+	protected float speedx;
+
+	protected float speedChangeDelta;
 
 	protected float RailSpeed;
 	protected float GravitySpeed;
 	protected float Gravity;
-	protected Vector3 GravityDirection;
 	protected Coroutine centerOnRailRoutine;
 
 	public int RailIndex;
 
-	protected Camera mainCamera;
+	protected MainCamera mainCamera;
 
 	protected CircleCollider2D cc;
 
 	public virtual void Start () {
 		RailIndex = 0;
 		RailSpeed = Speed;
-		Gravity = 15f;
+		Gravity = -15f;
 		StartCoroutine(DelayedInit());
 
-		mainCamera = Camera.main;
+		mainCamera = Camera.main.GetComponent<MainCamera>();
 		cc = GetComponent<CircleCollider2D>();
+
+		targetSpeed = Speed;
+		speedChangeDelta = 0.2f;
 	}
 
 	public virtual void Update() {
+		Vector3 startPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
 		if(AttachedRail == null) {
 			FreeMovement();
 		}
 		else {
 			RailMovement();
 		}
+
+		RailSpeed = Mathf.SmoothDamp(RailSpeed, targetSpeed, ref speedx, speedChangeDelta);
+
+		var viewportPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
+		var diff = viewportPosition - startPosition;
+		if ((viewportPosition.y > 1 && diff.y > 0) ||
+			(viewportPosition.y < 0 && diff.y < 0)) {
+			if(AttachedRail != null) {
+				DisconnectFromRail();
+			}
+			viewportPosition.y = 1 - viewportPosition.y;
+			transform.position = mainCamera.Camera.ViewportToWorldPoint(viewportPosition);
+		}	
 	}
 
 	public virtual void FreeMovement() {
-		GravitySpeed = Mathf.Min(GravitySpeed + Gravity * Time.deltaTime, Speed);
+		GravitySpeed = GravitySpeed + Gravity * Time.deltaTime;
+		if( Mathf.Abs(GravitySpeed) > 12f ) {
+			GravitySpeed = 12f * Mathf.Sign(Gravity);
+		}
 
 		//RailSpeed = 5 * Time.deltaTime;
-		var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
+		//var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
+		RailNode camTarget = mainCamera.Anchor.target;
+		var diff = camTarget.Direction * RailSpeed + camTarget.Normal * GravitySpeed;
 		var newPosition = transform.position + diff * Time.deltaTime;
-
-		var viewportPosition = mainCamera.WorldToViewportPoint(newPosition);
-		//if( (viewportPosition.x > 1 && diff.x > 0) ||
-		//	(viewportPosition.x < 0 && diff.x < 0)) {
-		//	newPosition.x *= -1;
-		//}
-		if ((viewportPosition.y > 1 && diff.y > 0) ||
-			(viewportPosition.y < 0 && diff.y < 0)) {
-			newPosition.y *= -1;
-		}
 
 		transform.position = newPosition;
 	}
@@ -92,7 +107,7 @@ public class RailRider : MonoBehaviour {
 			distanceToCenter = dist * Mathf.Sin(angle);
 		}
 		else {
-			GravityDirection = -target.Normal;
+			Gravity = -1f * Mathf.Abs(Gravity);
 			DisconnectFromRail();
 		}
 	}
@@ -127,7 +142,7 @@ public class RailRider : MonoBehaviour {
 	public virtual void DisconnectFromRail() {
 		AttachedRail.NodesRemoved -= RailRemovedNodes;
 		AttachedRail = null;
-		RailSpeed = Mathf.Clamp(RailSpeed, Speed * 0.8f, Speed * 1.2f);
+		//RailSpeed = Mathf.Clamp(RailSpeed, Speed * 0.5f, Speed * 1.5f);
 	}
 
 	public void RailRemovedNodes(object sender, int numRemoved) {

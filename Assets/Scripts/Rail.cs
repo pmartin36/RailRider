@@ -74,6 +74,7 @@ public class Rail : MonoBehaviour {
 			previousRailSegment = null;
 			Vector2 rd =  (transform.position - lastRailSpawnPosition).normalized;
 			Vector2 normal = rd.Rotate(90);
+			Debug.DrawRay(transform.position, normal, Color.blue, 3f);
 			nodes.Add(new RailNode(segIndex, 0, transform.position, rd, normal, false));
 			lastRailSpawnPosition = transform.position;
 		}

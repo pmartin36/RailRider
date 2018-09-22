@@ -34,10 +34,8 @@ public class CameraAnchor : RailRider {
 	}
 
 	public override void Update() {
-		var diff = Vector2.SignedAngle(currentRotation, targetRotation) * 2 * Time.deltaTime;
+		var diff = Vector2.SignedAngle(currentRotation, targetRotation) * 1f * Time.deltaTime;
 		currentRotation = currentRotation.Rotate(diff);
-		Debug.Log(diff);
-		Debug.Log(currentRotation);
 		transform.localRotation = Quaternion.Euler(0,0,Utils.VectorToAngle(currentRotation));
 		base.Update();
 	}

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - SegmentContainer
   - Rail
+  - ScreenBoundary
   layers:
   - Default
   - TransparentFX

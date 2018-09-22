@@ -87,7 +87,7 @@ public class RailSegment : PoolObject {
 		Vector3[] vertices = new Vector3[ModifiedNumNodes * 2];
 
 		RailNode lastNode = parentRail?.LastNode;
-		bool lastNodeValid = lastNode != null && lastNode.Valid;
+		bool lastNodeValid = lastNode != null;
 		Vector2 lastPosition = lastRailSpawnPosition;
 
 		Vector2 pivot;
