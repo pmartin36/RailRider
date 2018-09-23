@@ -13,6 +13,7 @@ public class RailRider : MonoBehaviour {
 	public float Speed;
 	protected float targetSpeed;
 	protected float speedx;
+	protected Vector2 speedy;
 
 	protected float speedChangeDelta;
 
@@ -71,8 +72,18 @@ public class RailRider : MonoBehaviour {
 
 		//RailSpeed = 5 * Time.deltaTime;
 		//var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
+
+
 		RailNode camTarget = mainCamera.Anchor.target;
-		var diff = camTarget.Direction * RailSpeed + camTarget.Normal * GravitySpeed;
+		Vector2 direction = Utils.AngleToVector(mainCamera.Anchor.transform.localRotation.eulerAngles.z);
+		Vector2 normal = direction.Rotate(90);
+
+		Vector3 diff = direction * RailSpeed + normal * GravitySpeed + mainCamera.Anchor.LastDiff;
+
+		Debug.DrawRay(transform.position, direction * RailSpeed, Color.blue);
+		Debug.DrawRay(transform.position, normal * GravitySpeed, Color.red);
+		Debug.DrawRay(transform.position, diff, Color.magenta);
+
 		var newPosition = transform.position + diff * Time.deltaTime;
 
 		transform.position = newPosition;

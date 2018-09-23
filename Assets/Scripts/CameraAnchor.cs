@@ -9,6 +9,7 @@ public class CameraAnchor : RailRider {
 	Vector2 currentRotation;
 
 	private float segmentIndex = 0;
+	public Vector2 LastDiff;
 
 	// Use this for initialization
 	public override void Start () {
@@ -37,6 +38,8 @@ public class CameraAnchor : RailRider {
 		var diff = Vector2.SignedAngle(currentRotation, targetRotation) * 1f * Time.deltaTime;
 		currentRotation = currentRotation.Rotate(diff);
 		transform.localRotation = Quaternion.Euler(0,0,Utils.VectorToAngle(currentRotation));
+		Vector3 lastPosition = transform.position;
 		base.Update();
+		LastDiff = transform.position - lastPosition;
 	}
 }

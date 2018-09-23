@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class MainCamera : MonoBehaviour {
 
-	public RailRider Anchor;
+	public CameraAnchor Anchor;
 	public Camera Camera;
 
 	// Use this for initialization
 	void Start () {
-		Anchor = transform.parent.GetComponent<RailRider>();
+		Anchor = transform.parent.GetComponent<CameraAnchor>();
 		Camera = Camera.main;
 	}
 	

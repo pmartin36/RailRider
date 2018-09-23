@@ -52,7 +52,8 @@ public class Player : RailRider {
 
 	public override void OnTriggerEnter2D(Collider2D collision) {
 		if(collision.gameObject.tag == "ScreenBoundary") {
-			RailSpeed = Speed * 3f;
+			float dir = mainCamera.Camera.WorldToScreenPoint(transform.position).x;
+			RailSpeed = Speed * dir > 0.5f ? -3f : 3f;
 			
 			StopCoroutine(RecoverFromBoundaryBump());
 			StartCoroutine(RecoverFromBoundaryBump());
