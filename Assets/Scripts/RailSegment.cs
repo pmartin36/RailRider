@@ -44,7 +44,7 @@ public class RailSegment : PoolObject {
 
 	public void Update() {
 		float time = Time.time;
-		if ( pc.enabled && Time.time > (killTime - 4f) ) {
+		if ( pc.enabled && Time.time > (killTime - 5f) ) {
 			pc.enabled = false;
 		}
 		else if ( Time.time > killTime ) {

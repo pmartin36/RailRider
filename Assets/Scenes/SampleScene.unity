@@ -241,7 +241,7 @@ Camera:
   far clip plane: 50
   field of view: 60
   orthographic: 1
-  orthographic size: 15
+  orthographic size: 30
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -295,7 +295,7 @@ GameObject:
   - component: {fileID: 589624497}
   - component: {fileID: 589624496}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: Camera Anchor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -313,8 +313,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AttachedRail: {fileID: 988926076}
-  Speed: 20
+  Speed: 15
   RailIndex: 0
+  LastDiff: {x: 0, y: 0}
 --- !u!4 &589624497
 Transform:
   m_ObjectHideFlags: 0
@@ -358,7 +359,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1053289861}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -60, y: 0, z: 0}
+  m_LocalPosition: {x: -100, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1840440256}
@@ -381,7 +382,7 @@ MonoBehaviour:
   RailDensity: 0.65
   RailSpeed: 20
   CorruptionOccurrence: 5
-  RailSize: 15
+  RailSize: 20
   segmentIndex: 0
 --- !u!1 &1392689281
 GameObject:
@@ -407,8 +408,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1392689281}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 25.49, y: -0.09, z: 10}
-  m_LocalScale: {x: 2.5, y: 40, z: 1}
+  m_LocalPosition: {x: 51, y: 0, z: 10}
+  m_LocalScale: {x: 5, y: 100, z: 1}
   m_Children: []
   m_Father: {fileID: 534669905}
   m_RootOrder: 1
@@ -497,7 +498,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4964203849812898, guid: 8207346c56b10a944ad2279917d8126e, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -7
+      value: -20
       objectReference: {fileID: 0}
     - target: {fileID: 4964203849812898, guid: 8207346c56b10a944ad2279917d8126e, type: 2}
       propertyPath: m_LocalPosition.z
@@ -566,7 +567,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AttachedRail: {fileID: 988926076}
-  Speed: 20
+  Speed: 15
   RailIndex: 0
 --- !u!50 &1642520757
 Rigidbody2D:
@@ -639,7 +640,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 5fee7a2ce01cca74dbed9814a3bea5c6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.13950695, g: 0.5813417, b: 0.8962264, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -657,7 +658,7 @@ Transform:
   m_GameObject: {fileID: 1642520755}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -53, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 1}
+  m_LocalScale: {x: 4, y: 4, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -686,8 +687,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1746438703}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -25.49, y: -0.09, z: 10}
-  m_LocalScale: {x: 2.5, y: 40, z: 1}
+  m_LocalPosition: {x: -51, y: 0, z: 10}
+  m_LocalScale: {x: 5, y: 100, z: 1}
   m_Children: []
   m_Father: {fileID: 534669905}
   m_RootOrder: 0
@@ -781,7 +782,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4964203849812898, guid: 8207346c56b10a944ad2279917d8126e, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 7
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4964203849812898, guid: 8207346c56b10a944ad2279917d8126e, type: 2}
       propertyPath: m_LocalPosition.z

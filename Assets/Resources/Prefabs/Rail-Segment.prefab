@@ -126,8 +126,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Key: Rail-Segment
-  StartingCount: 50
-  Width: 0.35
+  StartingCount: 75
+  Width: 1
   parentRail: {fileID: 0}
   NumNodes: 30
+  ModifiedNumNodes: 0
   InitialRailSegment: 0
+  SegmentIndex: 0

@@ -24,18 +24,18 @@ public class Player : RailRider {
 				// jump
 				float direction = Mathf.Sign(p.Vertical);
 				Gravity = direction * Mathf.Abs(Gravity);
-				GravitySpeed = 2f * direction;
+				GravitySpeed = 10f * direction;
 				DisconnectFromRail();
 				
 			}
 			else if( Mathf.Abs(p.Horizontal) > 0.2f ) {
 				if (p.Horizontal < 0) {
 					// slow down
-					targetSpeed = Speed * 0.4f;
+					targetSpeed = -Speed;
 				}
 				else {
 					// speed up
-					targetSpeed = Speed * 1.75f;
+					targetSpeed = Speed * 3f;
 				}
 			}	
 			else {
@@ -45,15 +45,15 @@ public class Player : RailRider {
 		else  {
 			if (p.Jump) {
 				//should probably use nonAlloc version - fix later for performance
-				ConnectToRailByOverlap(cc.radius * 2f);
+				ConnectToRailByOverlap(cc.radius * transform.localScale.x);
 			}
 		}
 	}
 
 	public override void OnTriggerEnter2D(Collider2D collision) {
 		if(collision.gameObject.tag == "ScreenBoundary") {
-			float dir = mainCamera.Camera.WorldToScreenPoint(transform.position).x;
-			RailSpeed = Speed * dir > 0.5f ? -3f : 3f;
+			float dir = mainCamera.Camera.WorldToViewportPoint(transform.position).x;
+			RailSpeed = Speed * (dir > 0.5f ? -5f : 5f);
 			
 			StopCoroutine(RecoverFromBoundaryBump());
 			StartCoroutine(RecoverFromBoundaryBump());

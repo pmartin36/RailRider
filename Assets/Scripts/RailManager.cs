@@ -37,8 +37,8 @@ public class RailManager : MonoBehaviour {
 		SetRailSpawnTimes();
 
 		var y = transform.position.y;
-		for (int x = -45; x < 45; x += 15) {
-			float kt = (1f / 22f) * x + 7;
+		for (int x = -80; x < 80; x += 20) {
+			float kt = (3f / 80f) * x + 17;
 			transform.position = new Vector3(x, y);
 
 			for (int i = 0; i < Rails.Count; i++) {

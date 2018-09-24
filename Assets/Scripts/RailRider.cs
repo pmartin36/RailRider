@@ -18,6 +18,7 @@ public class RailRider : MonoBehaviour {
 	protected float speedChangeDelta;
 
 	protected float RailSpeed;
+	protected float LastFrameRailSpeed;
 	protected float GravitySpeed;
 	protected float Gravity;
 	protected Coroutine centerOnRailRoutine;
@@ -31,7 +32,7 @@ public class RailRider : MonoBehaviour {
 	public virtual void Start () {
 		RailIndex = 0;
 		RailSpeed = Speed;
-		Gravity = -15f;
+		Gravity = -30f;
 		StartCoroutine(DelayedInit());
 
 		mainCamera = Camera.main.GetComponent<MainCamera>();
@@ -43,14 +44,14 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void Update() {
 		Vector3 startPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
-		if(AttachedRail == null) {
+		RailSpeed = Mathf.SmoothDamp(RailSpeed, targetSpeed, ref speedx, speedChangeDelta);
+		if (AttachedRail == null) {
 			FreeMovement();
 		}
 		else {
 			RailMovement();
 		}
-
-		RailSpeed = Mathf.SmoothDamp(RailSpeed, targetSpeed, ref speedx, speedChangeDelta);
+		LastFrameRailSpeed = RailSpeed;
 
 		var viewportPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
 		var diff = viewportPosition - startPosition;
@@ -66,23 +67,15 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void FreeMovement() {
 		GravitySpeed = GravitySpeed + Gravity * Time.deltaTime;
-		if( Mathf.Abs(GravitySpeed) > 12f ) {
-			GravitySpeed = 12f * Mathf.Sign(Gravity);
+		if( Mathf.Abs(GravitySpeed) > 30f ) {
+			GravitySpeed = 30f * Mathf.Sign(Gravity);
 		}
-
-		//RailSpeed = 5 * Time.deltaTime;
-		//var diff = target.Direction * RailSpeed + GravityDirection * GravitySpeed;
-
 
 		RailNode camTarget = mainCamera.Anchor.target;
 		Vector2 direction = Utils.AngleToVector(mainCamera.Anchor.transform.localRotation.eulerAngles.z);
 		Vector2 normal = direction.Rotate(90);
 
 		Vector3 diff = direction * RailSpeed + normal * GravitySpeed + mainCamera.Anchor.LastDiff;
-
-		Debug.DrawRay(transform.position, direction * RailSpeed, Color.blue);
-		Debug.DrawRay(transform.position, normal * GravitySpeed, Color.red);
-		Debug.DrawRay(transform.position, diff, Color.magenta);
 
 		var newPosition = transform.position + diff * Time.deltaTime;
 
@@ -91,19 +84,28 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void RailMovement() {
 		float movement = RailSpeed * Time.deltaTime;
-		while (AttachedRail != null && movement > 0) {
-			if (distanceToTarget > movement) {
-				transform.position += target.Direction * movement;
+		if( Mathf.Sign(LastFrameRailSpeed * RailSpeed) < 0f ){
+			// we changed direction
+			SetNextTarget();
+		}
+		while (AttachedRail != null) {
+			if (Mathf.Abs(distanceToTarget) > Mathf.Abs(movement)) {
+				transform.position += movement * target.Direction;
 				distanceToTarget -= movement;
-				movement = 0;
+				break;
 			}
 			else {
+				transform.position += distanceToTarget * target.Direction;
 				movement -= distanceToTarget;
-				transform.position += target.Direction * distanceToTarget;
-				RailIndex++;
-				SetTarget();
+				SetNextTarget();
 			}
 		}
+
+	}
+
+	public virtual void SetNextTarget() {
+		SetNextIndex();
+		SetTarget();
 	}
 
 	public virtual void SetTarget() {
@@ -114,11 +116,11 @@ public class RailRider : MonoBehaviour {
 			var dist = Vector2.Distance(transform.position, target.Position);
 			var angle = Vector2.SignedAngle( transform.position - target.Position, target.Direction ) * Mathf.Deg2Rad;
 
-			distanceToTarget = dist * Mathf.Abs( Mathf.Cos(angle) );
+			distanceToTarget = dist * -Mathf.Cos(angle);
 			distanceToCenter = dist * Mathf.Sin(angle);
 		}
 		else {
-			Gravity = -1f * Mathf.Abs(Gravity);
+			Gravity = -Mathf.Abs(Gravity);
 			DisconnectFromRail();
 		}
 	}
@@ -156,6 +158,15 @@ public class RailRider : MonoBehaviour {
 		//RailSpeed = Mathf.Clamp(RailSpeed, Speed * 0.5f, Speed * 1.5f);
 	}
 
+	protected void SetNextIndex() {	
+		if (RailSpeed >= 0) {
+			RailIndex++;
+		}
+		else {
+			RailIndex--;
+		}
+	}
+
 	public void RailRemovedNodes(object sender, int numRemoved) {
 		RailIndex = Mathf.Max(RailIndex - numRemoved, 0);
 	}
@@ -173,7 +184,7 @@ public class RailRider : MonoBehaviour {
 	}
 
 	protected virtual IEnumerator CenterOnRail() {
-		float movement = 2f * Time.deltaTime * Mathf.Sign(distanceToCenter);
+		float movement = Mathf.Abs(Gravity) / 5f * Time.deltaTime * Mathf.Sign(distanceToCenter);
 		while (AttachedRail != null && target != null) {		
 			if( Mathf.Abs(movement) > Mathf.Abs(distanceToCenter) ) {
 				transform.position += distanceToCenter * target.Normal;
