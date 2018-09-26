@@ -8,9 +8,44 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(InputManager))]
 public class GameManager : Singleton<GameManager> {
 
-	public bool Menu { get; set; }
-	public Player Player;
-	public RailManager RailManager;
+	private ContextManager ContextManager;
+	public LevelManager LevelManager {
+		get {
+			return ContextManager is LevelManager ? 
+					ContextManager as LevelManager : null;
+		}
+		set {
+			ContextManager = value; 
+		}
+	}
+	public MenuManager MenuManager {
+		get
+		{
+			return ContextManager is MenuManager ?
+					ContextManager as MenuManager : null;
+		}
+		set
+		{
+			ContextManager = value;
+		}
+	}
+
+	public Player Player {
+		get {
+			return (ContextManager as LevelManager)?.Player;
+		}
+		set {
+			(ContextManager as LevelManager).Player = value;
+		}
+	}
+	public RailManager RailManager {
+		get {
+			return (ContextManager as LevelManager)?.RailManager;
+		}
+		set {
+			(ContextManager as LevelManager).RailManager = value;
+		}
+	}
 
 
 	public void Awake() {
@@ -26,12 +61,7 @@ public class GameManager : Singleton<GameManager> {
 			Application.Quit();
 		}
 
-		if(Menu) {
-			
-		}
-		else {
-			Player.ProcessInputs(p);
-		}
+		ContextManager.ProcessInputs(p);
 	}
 
 	public void ReloadLevel() {

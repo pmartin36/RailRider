@@ -7,6 +7,7 @@ TagManager:
   - SegmentContainer
   - Rail
   - ScreenBoundary
+  - MarkerContainer
   layers:
   - Default
   - TransparentFX
@@ -18,7 +19,7 @@ TagManager:
   - 
   - PostProcessing
   - Rail
-  - 
+  - RechargeMarker
   - 
   - 
   - 
@@ -41,6 +42,18 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 1142117265
+    locked: 0
+  - name: Background+1
+    uniqueID: 2729842143
+    locked: 0
+  - name: Foreground-1
+    uniqueID: 2544963579
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Foreground+1
+    uniqueID: 4201719545
     locked: 0

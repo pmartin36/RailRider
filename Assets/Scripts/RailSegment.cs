@@ -25,6 +25,8 @@ public class RailSegment : PoolObject {
 	public RailNode[] Nodes;
 	public int SegmentIndex;
 
+	public RechargeMarker RechargeMarker;
+
 	public void Awake() {
 		RailSegmentContainer = RailSegmentContainer ?? GameObject.FindGameObjectWithTag("SegmentContainer");
 		transform.parent = RailSegmentContainer.transform;
@@ -75,7 +77,7 @@ public class RailSegment : PoolObject {
 	}
 
 
-	public RailNode[] CalculateNodes(float size, float spawnAngleDiff, Vector3 lastRailSpawnPosition, Vector3 currentPosition, int segIndex) {
+	public RailNode[] CalculateNodes(float size, float spawnAngleDiff, Vector3 lastRailSpawnPosition, Vector3 currentPosition, bool corrupted, int segIndex) {
 		SegmentIndex = segIndex;
 		float totalDistance = Vector3.Distance(lastRailSpawnPosition, currentPosition);
 		float distFactor = (totalDistance / size);
@@ -116,7 +118,7 @@ public class RailSegment : PoolObject {
 			if (i > 0) {
 				rd = (newPosition - lastPosition).normalized;
 				normal = rd.Rotate(90);
-				Nodes[i - 1] = new RailNode(segIndex, i, newPosition, rd, normal, true);
+				Nodes[i - 1] = new RailNode(segIndex, i, newPosition, rd, normal, corrupted, true);
 			} else {
 				if (lastNodeValid) {
 					rd = lastNode.Direction;
@@ -163,6 +165,7 @@ public class RailSegment : PoolObject {
 
 	public override void Recycle() {
 		parentRail.RemoveNodes(ModifiedNumNodes-1);
+		RechargeMarker?.Recycle();
 		base.Recycle();
 	}
 }

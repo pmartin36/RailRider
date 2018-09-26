@@ -9,6 +9,7 @@ public class RailRider : MonoBehaviour {
 	public RailNode target = RailNode.Invalid;
 	protected float distanceToTarget;
 	protected float distanceToCenter;
+	protected bool CanAttachToRail;
 
 	public float Speed;
 	protected float targetSpeed;
@@ -40,6 +41,7 @@ public class RailRider : MonoBehaviour {
 
 		targetSpeed = Speed;
 		speedChangeDelta = 0.2f;
+		CanAttachToRail = true;
 	}
 
 	public virtual void Update() {
@@ -121,25 +123,30 @@ public class RailRider : MonoBehaviour {
 		}
 		else {
 			Gravity = -Mathf.Abs(Gravity);
+			GravitySpeed = Mathf.Abs(RailSpeed) / 20f;
 			DisconnectFromRail();
 		}
 	}
 
 	public void ConnectToRail(Rail r) {
-		AttachedRail = r;
-		GravitySpeed = 0;
-		AttachedRail.NodesRemoved += RailRemovedNodes;
+		if(CanAttachToRail) {
+			AttachedRail = r;
+			GravitySpeed = 0;
+			AttachedRail.NodesRemoved += RailRemovedNodes;
+		}
 	}
 
 	public virtual void ConnectToRail(List<RailSegment> railSegments) {
 		Rail r = railSegments.FirstOrDefault()?.parentRail;
 		if (r != null) {
 			ConnectToRail(r);
-			RailIndex = AttachedRail.GetTargetIndex(railSegments, transform.position);
-			SetTarget();
+			if(AttachedRail != null) {
+				RailIndex = AttachedRail.GetTargetIndex(railSegments, transform.position);
+				SetTarget();
 
-			if(centerOnRailRoutine != null) StopCoroutine(centerOnRailRoutine);
-			centerOnRailRoutine = StartCoroutine(CenterOnRail());
+				if(centerOnRailRoutine != null) StopCoroutine(centerOnRailRoutine);
+				centerOnRailRoutine = StartCoroutine(CenterOnRail());
+			}
 		}
 	}
 
@@ -155,6 +162,7 @@ public class RailRider : MonoBehaviour {
 	public virtual void DisconnectFromRail() {
 		AttachedRail.NodesRemoved -= RailRemovedNodes;
 		AttachedRail = null;
+		StartCoroutine(DisableAttachToRail());
 		//RailSpeed = Mathf.Clamp(RailSpeed, Speed * 0.5f, Speed * 1.5f);
 	}
 
@@ -201,5 +209,11 @@ public class RailRider : MonoBehaviour {
 	protected IEnumerator DelayedInit() {
 		yield return new WaitForEndOfFrame();
 		ConnectToRailByOverlap();
+	}
+
+	protected IEnumerator DisableAttachToRail() {
+		CanAttachToRail = false;
+		yield return new WaitForSeconds(0.25f);
+		CanAttachToRail = true;
 	}
 }

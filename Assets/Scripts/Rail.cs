@@ -43,7 +43,7 @@ public class Rail : MonoBehaviour {
 	void Awake () {
 		lastRailSpawnPosition = transform.position;
 		railManager = GetComponentInParent<RailManager>();
-		seed = UnityEngine.Random.Range(0, 1000000);
+		seed = Mathf.RoundToInt(UnityEngine.Random.value * 1000000);
 		nodes = new List<RailNode>();
 	}
 
@@ -59,7 +59,7 @@ public class Rail : MonoBehaviour {
 	public void SpawnRail(float density, float size, float spawnAngleDiff, int segIndex, float killTime = 20f) {
 		var isCorrupted = UnityEngine.Random.value <= corruptedRailOverrideChance;
 		if (isCorrupted || Perlin.Noise01(Time.time * 5 + seed) <= density) {
-			RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex, killTime);
+			RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex, killTime: killTime);
 
 			if( isCorrupted ) {
 				r.SetCorrupted(true);
@@ -75,23 +75,38 @@ public class Rail : MonoBehaviour {
 			Vector2 rd =  (transform.position - lastRailSpawnPosition).normalized;
 			Vector2 normal = rd.Rotate(90);
 			Debug.DrawRay(transform.position, normal, Color.blue, 3f);
-			nodes.Add(new RailNode(segIndex, 0, transform.position, rd, normal, false));
+			nodes.Add(new RailNode(segIndex, 0, transform.position, rd, normal, isCorrupted, false));
 			lastRailSpawnPosition = transform.position;
 		}
 	}
 
 	public void SpawnCorruptedRail(float size, float spawnAngleDiff, int segIndex) {
-		RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex);
+		RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex, true);
 		r.SetCorrupted(true);
 		corruptedRailOverrideChance = 0.8f;
+
 		previousRailSegment = r;
 	}
 
-	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, int segIndex, float killTime = 20f) {
+	public void SpawnRailWithRechargeMarker(float size, float spawnAngleDiff, int segIndex) {
+		RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex);
+		r.SetCorrupted(false);
+		RailNode n = r.Nodes.LastOrDefault();
+		RechargeMarker marker = RechargeMarker.Create();
+		marker.Init();
+
+		marker.transform.position = new Vector3(n.Position.x, n.Position.y, -1f);
+		marker.transform.localRotation = Quaternion.Euler(0, 0, Utils.VectorToAngle(n.Direction));
+		r.RechargeMarker = marker;
+
+		previousRailSegment = r;
+	}
+
+	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, int segIndex, bool corrupted = false, float killTime = 20f) {
 		RailSegment r = RailSegment.Create();
 		r.parentRail = this;
 		r.Init(killTime);
-		var newNodes = r.CalculateNodes(size, spawnAngleDiff, lastRailSpawnPosition, this.transform.position, segIndex);		
+		var newNodes = r.CalculateNodes(size, spawnAngleDiff, lastRailSpawnPosition, this.transform.position, corrupted, segIndex);		
 		nodes.AddRange(newNodes);
 
 		previousRailSegment = r;

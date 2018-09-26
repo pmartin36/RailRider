@@ -19,19 +19,23 @@ public class RailManager : MonoBehaviour {
 	Vector3 lastRailSpawnPosition;
 	Vector3 nextRailSpawnPosition;
 
-	private int numRailsSinceLastCorruption;
+	private int numRailsSinceOutwardCorruption;
+	private int numRailsSinceRechargeMarker;
 	private int nextCorruptedRailIndex;
 	private float TimeBetweenRailSpawns;
 	private float spawnAngle;
 
 	public int segmentIndex = 0;
+	private float seed;
 
 	void Start () {
 		GameManager.Instance.RailManager = this;
 		Rails = GetComponentsInChildren<Rail>().ToList();
 
+		seed = Mathf.RoundToInt(Random.value * 1000000);
+
 		lastRailSpawnTime = Time.time;
-		numRailsSinceLastCorruption = 0;
+		numRailsSinceOutwardCorruption = 0;
 		lastRailSpawnPosition = transform.position;
 		
 		SetRailSpawnTimes();
@@ -66,15 +70,16 @@ public class RailManager : MonoBehaviour {
 
 	public void AddRail() {
 		var lastSpawnAngle = spawnAngle;
-		spawnAngle += Perlin.Noise(Time.time / 5f) * 30 - 15;
+		spawnAngle += Perlin.Noise(seed + Time.time / 5f) * 30 - 15;
 		var diff = spawnAngle - lastSpawnAngle;
 
 		transform.position = nextRailSpawnPosition;
 		transform.Rotate(0, 0, diff);
 
-		numRailsSinceLastCorruption++;
+		numRailsSinceOutwardCorruption++;
+		numRailsSinceRechargeMarker++;
 
-		if (numRailsSinceLastCorruption >= CorruptionOccurrence) {
+		if (numRailsSinceOutwardCorruption >= CorruptionOccurrence) {
 			for (int i = 0; i < Rails.Count; i++) {
 				if (i == nextCorruptedRailIndex) {
 					Rails[i].SpawnCorruptedRail(RailSize, diff, segmentIndex);
@@ -83,23 +88,40 @@ public class RailManager : MonoBehaviour {
 					Rails[i].SpawnRail(RailDensity, RailSize, diff, segmentIndex);
 				}
 			}
-			numRailsSinceLastCorruption = 0;
-		}
-		else if (numRailsSinceLastCorruption >= CorruptionOccurrence - 1) {
-			// find next corrupted rail and make sure that there's a rail before it
-			nextCorruptedRailIndex = Random.Range(0, Rails.Count);
-			for (int i = 0; i < Rails.Count; i++) {
-				if (i == nextCorruptedRailIndex) {
-					Rails[i].SpawnRail(1, RailSize, diff, segmentIndex);
-				}
-				else {
-					Rails[i].SpawnRail(RailDensity, RailSize, diff, segmentIndex);
-				}
-			}
+			numRailsSinceOutwardCorruption = 0;
 		}
 		else {
-			for (int i = 0; i < Rails.Count; i++) {
-				Rails[i].SpawnRail(RailDensity, RailSize, diff, segmentIndex);
+			int recharged = -1;
+			if (Random.value > 1f / (numRailsSinceRechargeMarker - 0.5f)) {
+				// we're spawning a recharge
+				numRailsSinceRechargeMarker = 0;
+				recharged = Random.Range(0, Rails.Count);
+			}
+
+			if (numRailsSinceOutwardCorruption >= CorruptionOccurrence - 1) {
+				// find next corrupted rail and make sure that there's a rail before it
+				nextCorruptedRailIndex = Random.Range(0, Rails.Count);
+				for (int i = 0; i < Rails.Count; i++) {
+					if( i == recharged) {
+						Rails[i].SpawnRailWithRechargeMarker(RailSize, diff, segmentIndex);
+					}
+					else if (i == nextCorruptedRailIndex) {
+						Rails[i].SpawnRail(1, RailSize, diff, segmentIndex);
+					}
+					else {
+						Rails[i].SpawnRail(RailDensity, RailSize, diff, segmentIndex);
+					}
+				}
+			}
+			else {
+				for (int i = 0; i < Rails.Count; i++) {
+					if (i == recharged) {
+						Rails[i].SpawnRailWithRechargeMarker(RailSize, diff, segmentIndex);
+					}
+					else {
+						Rails[i].SpawnRail(RailDensity, RailSize, diff, segmentIndex);
+					}
+				}
 			}
 		}
 
