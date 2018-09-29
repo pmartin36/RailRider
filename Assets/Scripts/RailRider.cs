@@ -45,7 +45,6 @@ public class RailRider : MonoBehaviour {
 	}
 
 	public virtual void Update() {
-		Vector3 startPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
 		RailSpeed = Mathf.SmoothDamp(RailSpeed, targetSpeed, ref speedx, speedChangeDelta);
 		if (AttachedRail == null) {
 			FreeMovement();
@@ -54,17 +53,19 @@ public class RailRider : MonoBehaviour {
 			RailMovement();
 		}
 		LastFrameRailSpeed = RailSpeed;
+	}
 
-		var viewportPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
-		var diff = viewportPosition - startPosition;
+	public void HandleScreenWrap(Vector3 start, Vector3 end) {
+		var viewportPosition = mainCamera.Camera.WorldToViewportPoint(end);
+		var diff = viewportPosition - start;
 		if ((viewportPosition.y > 1 && diff.y > 0) ||
 			(viewportPosition.y < 0 && diff.y < 0)) {
-			if(AttachedRail != null) {
+			if (AttachedRail != null) {
 				DisconnectFromRail();
 			}
 			viewportPosition.y = 1 - viewportPosition.y;
 			transform.position = mainCamera.Camera.ViewportToWorldPoint(viewportPosition);
-		}	
+		}
 	}
 
 	public virtual void FreeMovement() {

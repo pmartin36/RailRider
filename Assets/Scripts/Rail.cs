@@ -26,6 +26,7 @@ public class Rail : MonoBehaviour {
 	private RailSegment previousRailSegment;
 
 	private List<RailNode> nodes;
+	public int RailIndex;
 
 	public RailNode LastNode {
 		get {
@@ -90,11 +91,11 @@ public class Rail : MonoBehaviour {
 
 	public void SpawnRailWithRechargeMarker(float size, float spawnAngleDiff, int segIndex) {
 		RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex);
-		r.SetCorrupted(false);
-		RailNode n = r.Nodes.LastOrDefault();
+		r.SetCorrupted(false);	
 		RechargeMarker marker = RechargeMarker.Create();
 		marker.Init();
 
+		RailNode n = r.Nodes[ r.Nodes.Length / 2 ];
 		marker.transform.position = new Vector3(n.Position.x, n.Position.y, -1f);
 		marker.transform.localRotation = Quaternion.Euler(0, 0, Utils.VectorToAngle(n.Direction));
 		r.RechargeMarker = marker;

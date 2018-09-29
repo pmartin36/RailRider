@@ -17,15 +17,16 @@ public class Player : RailRider {
 	}
 
 	public override void Update () {
+		Vector3 startPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
 		base.Update();
 		if( AttachedRail == null ) {
-			charge -= 5 * Time.deltaTime;
+			charge -= 3 * Time.deltaTime;
 		} 
 		else if( target.Corrupted ) {
-			charge -= 10 * Time.deltaTime;
+			charge -= 8 * Time.deltaTime;
 		}
 		else {
-			charge -= 3 * Time.deltaTime;
+			charge -= 2 * Time.deltaTime;
 		}
 
 		if (charge <= 0){
@@ -34,6 +35,8 @@ public class Player : RailRider {
 		else {
 			PlayerPowerChanged?.Invoke(this, charge);
 		}
+
+		HandleScreenWrap(startPosition, transform.position);
 	}
 
 	public void ProcessInputs(InputPackage p) {
@@ -42,10 +45,13 @@ public class Player : RailRider {
 			if ( p.Jump ) {
 				Collider2D marker = Physics2D.OverlapCircle(transform.position, cc.radius * transform.localScale.x, 1 << LayerMask.NameToLayer("RechargeMarker"));
 				if( marker != null ) {
-					RechargeMarker m = marker.GetComponent<RechargeMarker>();
+					SingleMarker m = marker.GetComponent<SingleMarker>();
 					if( m.IsConditionMet(p.Vertical) ){
-						// corruption cleared
 						m.Recycle(); // do something better later
+
+
+						charge += 10;
+						PlayerPowerChanged?.Invoke(this, charge);
 					}
 				}
 				if (Mathf.Abs(p.Vertical) > 0.2f) {

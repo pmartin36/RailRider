@@ -17,5 +17,4 @@ public abstract class RechargeMarker : PoolObject {
 	public static RechargeMarker Create() {
 		return SingleMarker.Create();
 	}
-	
 }

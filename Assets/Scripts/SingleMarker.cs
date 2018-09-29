@@ -12,6 +12,7 @@ public enum MarkerType {
 public class SingleMarker : RechargeMarker {
 
 	MarkerType MarkerType;
+	public float value;
 	private SpriteRenderer spriteRenderer;
 	private static Sprite InMarkerSprite;
 	private static Sprite DownMarkerSprite;
@@ -35,21 +36,25 @@ public class SingleMarker : RechargeMarker {
 			case MarkerType.In:
 				InMarkerSprite = InMarkerSprite ?? Resources.Load<Sprite>("Sprites/arrow_in");
 				spriteRenderer.sprite = InMarkerSprite;
+				value = 10f;
 				break;
 			case MarkerType.Up:
 				DownMarkerSprite = DownMarkerSprite ?? Resources.Load<Sprite>("Sprites/down_arrow_out");
 				spriteRenderer.sprite = DownMarkerSprite;
 				spriteRenderer.flipY = true;
+				value = 20f;
 				break;
 			case MarkerType.Down:
 				DownMarkerSprite = DownMarkerSprite ?? Resources.Load<Sprite>("Sprites/down_arrow_out");
 				spriteRenderer.sprite = DownMarkerSprite;
 				spriteRenderer.flipY = false;
+				value = 20f;
 				break;
 			default:
 			case MarkerType.Out:
 				OutMarkerSprite = OutMarkerSprite ?? Resources.Load<Sprite>("Sprites/both_arrow_out");
 				spriteRenderer.sprite = OutMarkerSprite;
+				value = 15f;
 				break;
 		}
 	}
