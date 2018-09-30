@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class RailSegment : PoolObject {
+public class RailSegment : MonoBehaviour, PoolObject {
 
 	public static GameObject RailSegmentContainer;
 	private bool Corrupted;
@@ -26,6 +26,14 @@ public class RailSegment : PoolObject {
 	public int SegmentIndex;
 
 	public RechargeMarker RechargeMarker;
+
+	[Header("Pool Object Settings")]
+	[SerializeField]
+	private string _key;
+	public string Key { get { return _key; } set { _key = value; } }
+	[SerializeField]
+	private int _startingCount;
+	public int StartingCount { get {return _startingCount;} set {_startingCount = value;} }
 
 	public void Awake() {
 		RailSegmentContainer = RailSegmentContainer ?? GameObject.FindGameObjectWithTag("SegmentContainer");
@@ -72,7 +80,7 @@ public class RailSegment : PoolObject {
 			prefab.Key = name;
 			pm.CreatePool(prefab);
 		}
-		RailSegment seg = pm.Next(name) as RailSegment;
+		RailSegment seg = pm.Next<RailSegment>(name);
 		return seg;
 	}
 
@@ -163,9 +171,10 @@ public class RailSegment : PoolObject {
 		return Nodes;
 	}
 
-	public override void Recycle() {
+	public void Recycle() {
 		parentRail.RemoveNodes(ModifiedNumNodes-1);
 		RechargeMarker?.Recycle();
-		base.Recycle();
+		this.gameObject.SetActive(false);
+		PoolManager.Instance.Recycle(this);
 	}
 }

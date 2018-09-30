@@ -34,6 +34,13 @@ public class Rail : MonoBehaviour {
 		}
 	}
 
+	public RailNode FirstNode {
+		get
+		{
+			return nodes.FirstOrDefault();
+		}
+	}
+
 	public int NodeCount {
 		get {
 			return nodes.Count;
@@ -98,6 +105,7 @@ public class Rail : MonoBehaviour {
 		RailNode n = r.Nodes[ r.Nodes.Length / 2 ];
 		marker.transform.position = new Vector3(n.Position.x, n.Position.y, -1f);
 		marker.transform.localRotation = Quaternion.Euler(0, 0, Utils.VectorToAngle(n.Direction));
+		marker.AttachedRailSegment = r;
 		r.RechargeMarker = marker;
 
 		previousRailSegment = r;

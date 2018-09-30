@@ -12,22 +12,22 @@ public class PoolManager : Dictionary<string, Queue<PoolObject>> {
 		}
 	}
 
-	public void CreatePool (PoolObject po) {
+	public void CreatePool<T>(T po) where T : MonoBehaviour, PoolObject{
 		this.Add(po.Key, new Queue<PoolObject>());
 
 		for(int i = 0; i < po.StartingCount; i++) {
-			PoolObject o = GameObject.Instantiate(po);
+			T o = GameObject.Instantiate(po);
 			o.gameObject.SetActive(false);
 			this[po.Key].Enqueue(o);
 		}
 	}
 
-	public PoolObject Next(string key) {
-		var next = this[key].Dequeue();
+	public T Next<T>(string key) where T : MonoBehaviour, PoolObject {
+		var next = this[key].Dequeue() as T;
 
 		// if we're taking the last object, create another one in its place
 		if (this[key].Count == 1) {
-			PoolObject o = GameObject.Instantiate(next);
+			T o = GameObject.Instantiate(next);
 			o.gameObject.SetActive(false);
 			this[key].Enqueue(o);
 		}

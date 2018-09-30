@@ -12,7 +12,7 @@ public enum MarkerType {
 public class SingleMarker : RechargeMarker {
 
 	MarkerType MarkerType;
-	public float value;
+	public float Value;
 	private SpriteRenderer spriteRenderer;
 	private static Sprite InMarkerSprite;
 	private static Sprite DownMarkerSprite;
@@ -20,8 +20,7 @@ public class SingleMarker : RechargeMarker {
 
 	// Use this for initialization
 	public override void Awake () {
-		MarkerContainer = MarkerContainer ?? GameObject.FindGameObjectWithTag("MarkerContainer").transform;
-		transform.parent = MarkerContainer;
+		base.Awake();
 		spriteRenderer = GetComponent<SpriteRenderer>();
 	}
 	
@@ -36,25 +35,25 @@ public class SingleMarker : RechargeMarker {
 			case MarkerType.In:
 				InMarkerSprite = InMarkerSprite ?? Resources.Load<Sprite>("Sprites/arrow_in");
 				spriteRenderer.sprite = InMarkerSprite;
-				value = 10f;
+				Value = 10f;
 				break;
 			case MarkerType.Up:
 				DownMarkerSprite = DownMarkerSprite ?? Resources.Load<Sprite>("Sprites/down_arrow_out");
 				spriteRenderer.sprite = DownMarkerSprite;
 				spriteRenderer.flipY = true;
-				value = 20f;
+				Value = 20f;
 				break;
 			case MarkerType.Down:
 				DownMarkerSprite = DownMarkerSprite ?? Resources.Load<Sprite>("Sprites/down_arrow_out");
 				spriteRenderer.sprite = DownMarkerSprite;
 				spriteRenderer.flipY = false;
-				value = 20f;
+				Value = 20f;
 				break;
 			default:
 			case MarkerType.Out:
 				OutMarkerSprite = OutMarkerSprite ?? Resources.Load<Sprite>("Sprites/both_arrow_out");
 				spriteRenderer.sprite = OutMarkerSprite;
-				value = 15f;
+				Value = 15f;
 				break;
 		}
 	}
@@ -67,21 +66,24 @@ public class SingleMarker : RechargeMarker {
 			prefab.Key = name;
 			pm.CreatePool(prefab);
 		}
-		SingleMarker seg = pm.Next(name) as SingleMarker;
+		SingleMarker seg = pm.Next<SingleMarker>(name);
 		return seg;
 	}
 
-	public override bool IsConditionMet(float f) {
+	public override bool IsConditionMet(bool jumping, bool attachedToRail, float direction) {
+		if(!jumping || !attachedToRail) return false;
+
 		switch (MarkerType) {
 			case MarkerType.In: 
-				return Mathf.Abs(f) < 0.3f;
+				return Mathf.Abs(direction) < 0.3f;
 			case MarkerType.Up:
-				return f > 0.5f;
+				return direction > 0.5f;
 			case MarkerType.Down:
-				return f < -0.5f;
-			default:
+				return direction < -0.5f;
 			case MarkerType.Out:
-				return Mathf.Abs(f) > 0.5f;
+				return Mathf.Abs(direction) > 0.5f;
+			default:
+				return true;
 		}
 	}
 }

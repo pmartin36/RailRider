@@ -8,6 +8,8 @@ TagManager:
   - Rail
   - ScreenBoundary
   - MarkerContainer
+  - RechargeMarker
+  - RechargePellet
   layers:
   - Default
   - TransparentFX

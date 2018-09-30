@@ -4,14 +4,10 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 
-public class PoolObject : MonoBehaviour{
-	[HideInInspector]
-	public string Key;
-	public int StartingCount;
+public interface PoolObject {
+	string Key { get; set; }
+	int StartingCount { get; set; }
 
-	public virtual void Recycle() {
-		gameObject.SetActive(false);
-		PoolManager.Instance.Recycle(this);
-	}
+	void Recycle();
 }
 

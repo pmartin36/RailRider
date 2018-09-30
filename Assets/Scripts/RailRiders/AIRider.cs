@@ -12,10 +12,6 @@ public class AIRider : RailRider {
 		base.Start();
 		targetSpeed = Speed * 2f;
 		checksOnRail = 1;
-
-		ConnectToRail(GameManager.Instance.RailManager.GetAnotherRail(null));
-		SetNextTarget();
-		transform.position = target.Position;
 	}
 
 	public override void Update() {

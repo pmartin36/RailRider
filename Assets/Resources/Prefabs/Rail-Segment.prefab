@@ -125,11 +125,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bdcaba7ab9d68514195b296d2eb60843, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Key: Rail-Segment
-  StartingCount: 75
   Width: 1
   parentRail: {fileID: 0}
   NumNodes: 30
   ModifiedNumNodes: 0
   InitialRailSegment: 0
   SegmentIndex: 0
+  RechargeMarker: {fileID: 0}
+  _key: Rail-Segment
+  _startingCount: 75

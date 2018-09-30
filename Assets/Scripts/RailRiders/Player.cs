@@ -9,6 +9,7 @@ public class Player : RailRider {
 	public static event EventHandler<float> PlayerPowerChanged;
 	private Coroutine boundaryBump;
 	private float charge;
+	private RechargeMarker overlappingMarker;
 
 	public override void Start () {
 		GameManager.Instance.Player = this;
@@ -20,40 +21,45 @@ public class Player : RailRider {
 		Vector3 startPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
 		base.Update();
 		if( AttachedRail == null ) {
-			charge -= 3 * Time.deltaTime;
+			ModifyCharge(-3 * Time.deltaTime);
 		} 
 		else if( target.Corrupted ) {
-			charge -= 8 * Time.deltaTime;
+			ModifyCharge(-8 * Time.deltaTime);
 		}
 		else {
-			charge -= 2 * Time.deltaTime;
-		}
-
-		if (charge <= 0){
-
-		}
-		else {
-			PlayerPowerChanged?.Invoke(this, charge);
+			ModifyCharge(-2 * Time.deltaTime);
 		}
 
 		HandleScreenWrap(startPosition, transform.position);
 	}
 
+	private void ModifyCharge(float diff){
+		charge += diff;
+		if (charge <= 0) {
+
+		}
+		else {
+			PlayerPowerChanged?.Invoke(this, charge);
+		}
+	}
+
 	public void ProcessInputs(InputPackage p) {
 		Vector2 inputDirection = new Vector2(p.Horizontal, p.Vertical);
+
+		if (overlappingMarker != null) {		
+			if (overlappingMarker.IsConditionMet(p.Jump, AttachedRail != null, p.Vertical)) {
+				if( overlappingMarker is SingleMarker ) {
+					SingleMarker m = overlappingMarker as SingleMarker;
+					ModifyCharge(m.Value);
+				}
+				
+				overlappingMarker.ActivatedAction();
+				overlappingMarker = null;
+			}
+		}
+
 		if (AttachedRail != null) {
 			if ( p.Jump ) {
-				Collider2D marker = Physics2D.OverlapCircle(transform.position, cc.radius * transform.localScale.x, 1 << LayerMask.NameToLayer("RechargeMarker"));
-				if( marker != null ) {
-					SingleMarker m = marker.GetComponent<SingleMarker>();
-					if( m.IsConditionMet(p.Vertical) ){
-						m.Recycle(); // do something better later
-
-
-						charge += 10;
-						PlayerPowerChanged?.Invoke(this, charge);
-					}
-				}
 				if (Mathf.Abs(p.Vertical) > 0.2f) {
 					float direction = Mathf.Sign(p.Vertical);
 					Gravity = direction * Mathf.Abs(Gravity);
@@ -93,10 +99,28 @@ public class Player : RailRider {
 			StopCoroutine(RecoverFromBoundaryBump());
 			StartCoroutine(RecoverFromBoundaryBump());
 		}
+		else if (collision.gameObject.tag == "RechargeMarker") {
+			overlappingMarker = collision.GetComponent<RechargeMarker>();
+		}
+		else if (collision.gameObject.tag == "RechargePellet") {
+			ModifyCharge(4);
+			collision.GetComponent<RechargePellet>().ActivatedAction();
+		}
+		else if (collision.tag == "CorruptedTrail") {
+			ModifyCharge(-4);
+		}
+	}
+
+	public void OnTriggerStay2D(Collider2D collision) {
+		if (collision.tag == "CorruptedTrail") {
+			ModifyCharge(-6 * Time.deltaTime);
+		}
 	}
 
 	public override void OnTriggerExit2D(Collider2D collision) {
-
+		if (collision.gameObject.tag == "RechargeMarker") {
+			overlappingMarker = null;
+		}
 	}
 
 	private IEnumerator RecoverFromBoundaryBump() {
