@@ -34,7 +34,7 @@ public class Player : RailRider {
 	}
 
 	private void ModifyCharge(float diff){
-		charge += diff;
+		charge = Mathf.Clamp(charge+diff, 0, 100);
 		if (charge <= 0) {
 
 		}
@@ -103,7 +103,7 @@ public class Player : RailRider {
 			overlappingMarker = collision.GetComponent<RechargeMarker>();
 		}
 		else if (collision.gameObject.tag == "RechargePellet") {
-			ModifyCharge(4);
+			ModifyCharge(3);
 			collision.GetComponent<RechargePellet>().ActivatedAction();
 		}
 		else if (collision.tag == "CorruptedTrail") {

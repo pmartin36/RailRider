@@ -30,7 +30,7 @@ public abstract class RechargeMarker : MonoBehaviour, PoolObject {
 
 	public static RechargeMarker Create() {
 		float random = UnityEngine.Random.value;
-		if( random > 0.0f) {
+		if( random > 0.8f) {
 			return RechargeRiderMarker.Create();
 		}
 		else {

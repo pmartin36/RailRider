@@ -6,6 +6,7 @@ using UnityEngine;
 public class RailManager : MonoBehaviour {
 
 	private List<Rail> Rails;
+	public static int NumRails = 3;
 
 	[Range(0.2f,1)]
 	public float RailDensity;

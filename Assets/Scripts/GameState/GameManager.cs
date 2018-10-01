@@ -46,6 +46,16 @@ public class GameManager : Singleton<GameManager> {
 			(ContextManager as LevelManager).RailManager = value;
 		}
 	}
+	public ThreatManager ThreatManager {
+		get
+		{
+			return (ContextManager as LevelManager)?.ThreatManager;
+		}
+		set
+		{
+			(ContextManager as LevelManager).ThreatManager = value;
+		}
+	}
 
 
 	public void Awake() {

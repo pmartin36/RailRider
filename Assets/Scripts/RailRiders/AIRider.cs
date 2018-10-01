@@ -20,7 +20,7 @@ public class AIRider : RailRider {
 			if(timeOnRail * 2f > checksOnRail) {
 				if (Random.value > 1f / (1 + checksOnRail)) {
 					var proposedDirection = AttachedRail.RailIndex -1;
-					float direction = Mathf.Sign(((proposedDirection + 3) % 3) - AttachedRail.RailIndex);
+					float direction = Mathf.Sign(((proposedDirection + RailManager.NumRails) % RailManager.NumRails) - AttachedRail.RailIndex);
 					Gravity = direction * Mathf.Abs(Gravity);
 					GravitySpeed = 10f * direction;
 					DisconnectFromRail();

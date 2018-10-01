@@ -27,17 +27,11 @@ public class Rail : MonoBehaviour {
 
 	private List<RailNode> nodes;
 	public int RailIndex;
+	public List<Vector3> RailSegmentPositions;
 
 	public RailNode LastNode {
 		get {
 			return nodes.LastOrDefault();
-		}
-	}
-
-	public RailNode FirstNode {
-		get
-		{
-			return nodes.FirstOrDefault();
 		}
 	}
 
@@ -53,15 +47,11 @@ public class Rail : MonoBehaviour {
 		railManager = GetComponentInParent<RailManager>();
 		seed = Mathf.RoundToInt(UnityEngine.Random.value * 1000000);
 		nodes = new List<RailNode>();
+		RailSegmentPositions = new List<Vector3>();
 	}
 
-	private void Start() {
-
-	}
-
-	// Update is called once per frame
-	void Update () {
-		
+	public int FindIndex(Vector3 pos) {
+		return nodes.FindIndex(r => r.Position == pos);
 	}
 
 	public void SpawnRail(float density, float size, float spawnAngleDiff, int segIndex, float killTime = 20f) {
@@ -117,6 +107,7 @@ public class Rail : MonoBehaviour {
 		r.Init(killTime);
 		var newNodes = r.CalculateNodes(size, spawnAngleDiff, lastRailSpawnPosition, this.transform.position, corrupted, segIndex);		
 		nodes.AddRange(newNodes);
+		RailSegmentPositions.Add(transform.position);
 
 		previousRailSegment = r;
 		lastRailSpawnPosition = transform.position;
@@ -146,6 +137,7 @@ public class Rail : MonoBehaviour {
 	}
 	
 	public void RemoveNodes(int numNodes) {
+		RailSegmentPositions.RemoveAt(0);
 		nodes.RemoveRange(0,numNodes);
 		NodesRemoved?.Invoke(this, numNodes);
 	}
