@@ -5,6 +5,7 @@ using UnityEngine;
 
 public abstract class RechargeMarker : MonoBehaviour, PoolObject {
 	public static Transform MarkerContainer;
+	public float Value;
 	public RailSegment AttachedRailSegment;
 
 	[Header("Pool Object Settings")]
@@ -30,7 +31,7 @@ public abstract class RechargeMarker : MonoBehaviour, PoolObject {
 
 	public static RechargeMarker Create() {
 		float random = UnityEngine.Random.value;
-		if( random > 0.8f) {
+		if( random > 0.0f) {
 			return RechargeRiderMarker.Create();
 		}
 		else {

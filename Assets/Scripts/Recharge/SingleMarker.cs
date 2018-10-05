@@ -12,7 +12,6 @@ public enum MarkerType {
 public class SingleMarker : RechargeMarker {
 
 	MarkerType MarkerType;
-	public float Value;
 	private SpriteRenderer spriteRenderer;
 	private static Sprite InMarkerSprite;
 	private static Sprite DownMarkerSprite;

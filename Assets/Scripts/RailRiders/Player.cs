@@ -11,24 +11,34 @@ public class Player : RailRider {
 	private float charge;
 	private RechargeMarker overlappingMarker;
 
+	private List<ICorruption> collidedCorruptions;
+
 	public override void Start () {
 		GameManager.Instance.Player = this;
 		charge = 100;
+		collidedCorruptions = new List<ICorruption>();
 		base.Start();
 	}
 
 	public override void Update () {
 		Vector3 startPosition = mainCamera.Camera.WorldToViewportPoint(transform.position);
 		base.Update();
-		if( AttachedRail == null ) {
-			ModifyCharge(-3 * Time.deltaTime);
+
+		float chargeDiff = 0;
+		foreach (ICorruption c in collidedCorruptions) {
+			chargeDiff -= c.SustainDamage;
+		}
+		if ( AttachedRail == null ) {
+			chargeDiff -= 3;
 		} 
 		else if( target.Corrupted ) {
-			ModifyCharge(-8 * Time.deltaTime);
+			chargeDiff -= -8;
 		}
 		else {
-			ModifyCharge(-2 * Time.deltaTime);
+			chargeDiff -= -2;
 		}
+
+		ModifyCharge(chargeDiff * Time.deltaTime);
 
 		HandleScreenWrap(startPosition, transform.position);
 	}
@@ -103,23 +113,34 @@ public class Player : RailRider {
 			overlappingMarker = collision.GetComponent<RechargeMarker>();
 		}
 		else if (collision.gameObject.tag == "RechargePellet") {
-			ModifyCharge(3);
-			collision.GetComponent<RechargePellet>().ActivatedAction();
+			var pellet = collision.GetComponent<RechargePellet>();
+			if( pellet == null ) {
+				var sin = collision.GetComponent<SinusoidHead>();
+				ModifyCharge(sin.Value);
+				sin.ActivatedAction();
+			}
+			else {
+				ModifyCharge(pellet.Value);
+				pellet.ActivatedAction();
+			}
 		}
-		else if (collision.tag == "CorruptedTrail") {
-			ModifyCharge(-4);
+		else if (collision.tag == "Corruption") {
+			var comp = (collision.GetComponent<CorruptedTrail>() as ICorruption) ??
+						collision.transform.parent?.GetComponent<SinusoidEnemy>() as ICorruption;
+			collidedCorruptions.Add(comp);
+			ModifyCharge(-comp.InitialDamage);
 		}
 	}
 
-	public void OnTriggerStay2D(Collider2D collision) {
-		if (collision.tag == "CorruptedTrail") {
-			ModifyCharge(-6 * Time.deltaTime);
-		}
-	}
 
 	public override void OnTriggerExit2D(Collider2D collision) {
 		if (collision.gameObject.tag == "RechargeMarker") {
 			overlappingMarker = null;
+		}
+		else if (collision.tag == "Corruption") {
+			var comp =  (collision.GetComponent<CorruptedTrail>() as ICorruption) ?? 
+						collision.transform.parent?.GetComponent<SinusoidEnemy>() as ICorruption;
+			collidedCorruptions.Remove(comp);
 		}
 	}
 

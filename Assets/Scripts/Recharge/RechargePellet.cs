@@ -2,13 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RechargePellet : RechargeMarker, PoolObject {
+public class RechargePellet : MonoBehaviour, PoolObject {
 
 	[Header("Recharge Pellet Settings")]
 	public float Lifetime;
 	private float aliveTime;
+	
+	public float Value;
 
-	public new static RechargePellet Create() {
+	[Header("Pool Object Settings")]
+	[SerializeField]
+	protected string _key;
+	public string Key { get { return _key; } set { _key = value; } }
+	[SerializeField]
+	protected int _startingCount;
+	public int StartingCount { get { return _startingCount; } set { _startingCount = value; } }
+
+	public static RechargePellet Create() {
 		var name = "Recharge-Pellet";
 		PoolManager pm = PoolManager.Instance;
 		if (!pm.ContainsKey(name)) {
@@ -20,8 +30,8 @@ public class RechargePellet : RechargeMarker, PoolObject {
 		return seg;
 	}
 
-	public override bool IsConditionMet(bool jumping, bool attachedToRail, float direction) {
-		return true;
+	public virtual void ActivatedAction() {
+		Recycle();
 	}
 
 	public void Update() {
@@ -31,8 +41,9 @@ public class RechargePellet : RechargeMarker, PoolObject {
 		}
 	}
 
-	public override void Recycle() {
+	public void Recycle() {
 		aliveTime = 0;
-		base.Recycle();
+		this.gameObject.SetActive(false);
+		PoolManager.Instance.Recycle(this);
 	}
 }

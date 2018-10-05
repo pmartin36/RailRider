@@ -10,6 +10,8 @@ TagManager:
   - MarkerContainer
   - RechargeMarker
   - RechargePellet
+  - CorruptedTrail
+  - Corruption
   layers:
   - Default
   - TransparentFX

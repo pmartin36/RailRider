@@ -72,6 +72,7 @@ MonoBehaviour:
   _key: Recharge-Pellet
   _startingCount: 25
   Lifetime: 10
+  Value: 3
 --- !u!212 &212082880682421030
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -108,7 +109,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: 5fee7a2ce01cca74dbed9814a3bea5c6, type: 3}
-  m_Color: {r: 0.6650944, g: 0.90304774, b: 1, a: 1}
+  m_Color: {r: 0.28773582, g: 0.53236824, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

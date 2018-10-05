@@ -20,10 +20,25 @@ public class ThreatManager : MonoBehaviour {
 			int index = UnityEngine.Random.Range(0, EnemyTypes.Count);
 
 			GameObject o = Instantiate(EnemyTypes[index].gameObject);
-			dynamic t = o.GetComponent(EnemyTypes[index].type);
-			t.Init();
+			var type = EnemyTypes[index].type;
+			if (type == "Sinusoid") {
+				nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(10f, 15f);
 
-			nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
+				var t = o.GetComponent<SinusoidEnemy>();
+				t.Init();
+			} 
+			else if (type == "CorruptedAIRider") {
+				nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
+
+				var t = o.GetComponent<CorruptedAIRider>();
+				t.Init();
+			}
+			else {
+				nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
+
+			}
+
+			
 		}
 	}
 }
