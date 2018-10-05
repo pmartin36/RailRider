@@ -69,6 +69,10 @@ public class RailManager : MonoBehaviour {
 		return rail;
 	}
 
+	public Rail GetRail(int index) {
+		return Rails[index];
+	}
+
 	public void AddRail() {
 		var lastSpawnAngle = spawnAngle;
 		spawnAngle += Perlin.Noise(seed + Time.time / 5f) * 30 - 15;

@@ -36,6 +36,8 @@ public class ThreatManager : MonoBehaviour {
 			else {
 				nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
 
+				var t = o.GetComponent<PatrolEnemy>();
+				t.Init();
 			}
 
 			

@@ -125,7 +125,8 @@ public class Player : RailRider {
 			}
 		}
 		else if (collision.tag == "Corruption") {
-			var comp = (collision.GetComponent<CorruptedTrail>() as ICorruption) ??
+			var comp =	(collision.GetComponent<CorruptedTrail>() as ICorruption) ??
+						(collision.GetComponent<PatrolEnemy>() as ICorruption) ??
 						collision.transform.parent?.GetComponent<SinusoidEnemy>() as ICorruption;
 			collidedCorruptions.Add(comp);
 			ModifyCharge(-comp.InitialDamage);
@@ -138,7 +139,8 @@ public class Player : RailRider {
 			overlappingMarker = null;
 		}
 		else if (collision.tag == "Corruption") {
-			var comp =  (collision.GetComponent<CorruptedTrail>() as ICorruption) ?? 
+			var comp =	(collision.GetComponent<CorruptedTrail>() as ICorruption) ??
+						(collision.GetComponent<PatrolEnemy>() as ICorruption) ??
 						collision.transform.parent?.GetComponent<SinusoidEnemy>() as ICorruption;
 			collidedCorruptions.Remove(comp);
 		}
