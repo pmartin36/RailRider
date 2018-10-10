@@ -42,8 +42,11 @@ public class RailManager : MonoBehaviour {
 		SetRailSpawnTimes();
 
 		var y = transform.position.y;
+		// create excel sheet, count from -80 to 80
+		// set value of 80 to your desired killTime
+		// subtract 0.75 for each value of 20 -> (CameraRailSpeed/RailLength) - (15/20)
 		for (int x = -80; x < 80; x += 20) {
-			float kt = (3f / 80f) * x + 17;
+			float kt = (3f / 80f) * x + 22;
 			transform.position = new Vector3(x, y);
 
 			for (int i = 0; i < Rails.Count; i++) {
@@ -75,8 +78,8 @@ public class RailManager : MonoBehaviour {
 
 	public void AddRail() {
 		var lastSpawnAngle = spawnAngle;
-		spawnAngle += Perlin.Noise(seed + Time.time / 5f) * 30 - 15;
-		var diff = spawnAngle - lastSpawnAngle;
+		float diff = Perlin.Noise(seed + Time.time / 15f) * 35;
+		spawnAngle += diff;
 
 		transform.position = nextRailSpawnPosition;
 		transform.Rotate(0, 0, diff);

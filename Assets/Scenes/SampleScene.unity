@@ -742,6 +742,9 @@ MonoBehaviour:
   - type: Sinusoid
     gameObject: {fileID: 1046075173966576, guid: 64596d9a40809df478abffe7455d1c89,
       type: 2}
+  - type: Patrol
+    gameObject: {fileID: 1417683476085592, guid: 2af27ec4506956e43aadbde032e01572,
+      type: 2}
 --- !u!1 &1392689281
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,7 +915,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1642520756
 MonoBehaviour:
   m_ObjectHideFlags: 0

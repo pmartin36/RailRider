@@ -34,7 +34,6 @@ public class RailRider : MonoBehaviour {
 		RailIndex = 0;
 		RailSpeed = Speed;
 		Gravity = -30f;
-		StartCoroutine(DelayedInit());
 
 		mainCamera = Camera.main.GetComponent<MainCamera>();
 		cc = GetComponent<CircleCollider2D>();
@@ -111,6 +110,12 @@ public class RailRider : MonoBehaviour {
 		SetTarget();
 	}
 
+	public virtual void OverranRail() {
+		Gravity = -Mathf.Abs(Gravity);
+		GravitySpeed = Mathf.Abs(RailSpeed) / 20f;
+		DisconnectFromRail();
+	}
+
 	public virtual void SetTarget() {
 		RailNode nextPosition = AttachedRail.GetTargetRailNode(RailIndex);
 		if (nextPosition.Valid) {
@@ -123,9 +128,7 @@ public class RailRider : MonoBehaviour {
 			distanceToCenter = dist * Mathf.Sin(angle);
 		}
 		else {
-			Gravity = -Mathf.Abs(Gravity);
-			GravitySpeed = Mathf.Abs(RailSpeed) / 20f;
-			DisconnectFromRail();
+			OverranRail();
 		}
 	}
 
@@ -177,6 +180,7 @@ public class RailRider : MonoBehaviour {
 	}
 
 	public void RailRemovedNodes(object sender, int numRemoved) {
+		// Debug.Log(gameObject.name + " " + AttachedRail.name);
 		RailIndex = Mathf.Max(RailIndex - numRemoved, 0);
 	}
 

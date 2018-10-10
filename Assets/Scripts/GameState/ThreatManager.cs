@@ -39,8 +39,6 @@ public class ThreatManager : MonoBehaviour {
 				var t = o.GetComponent<PatrolEnemy>();
 				t.Init();
 			}
-
-			
 		}
 	}
 }

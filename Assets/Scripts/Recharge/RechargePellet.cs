@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RechargePellet : MonoBehaviour, PoolObject {
+public class RechargePellet : RechargeMarker, PoolObject {
 
 	[Header("Recharge Pellet Settings")]
 	public float Lifetime;
 	private float aliveTime;
-	
-	public float Value;
 
 	[Header("Pool Object Settings")]
 	[SerializeField]
@@ -30,7 +28,7 @@ public class RechargePellet : MonoBehaviour, PoolObject {
 		return seg;
 	}
 
-	public virtual void ActivatedAction() {
+	public override void ActivatedAction() {
 		Recycle();
 	}
 

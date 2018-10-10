@@ -54,7 +54,7 @@ public class Rail : MonoBehaviour {
 		return nodes.FindIndex(r => r.Position == pos);
 	}
 
-	public void SpawnRail(float density, float size, float spawnAngleDiff, int segIndex, float killTime = 20f) {
+	public void SpawnRail(float density, float size, float spawnAngleDiff, int segIndex, float killTime = 25f) {
 		var isCorrupted = UnityEngine.Random.value <= corruptedRailOverrideChance;
 		if (isCorrupted || Perlin.Noise01(Time.time * 5 + seed) <= density) {
 			RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex, killTime: killTime);
@@ -89,7 +89,7 @@ public class Rail : MonoBehaviour {
 	public void SpawnRailWithRechargeMarker(float size, float spawnAngleDiff, int segIndex) {
 		RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex);
 		r.SetCorrupted(false);	
-		RechargeMarker marker = RechargeMarker.Create();
+		OnRailRechargeMarker marker = OnRailRechargeMarker.Create();
 		marker.Init();
 
 		RailNode n = r.Nodes[ r.Nodes.Length / 2 ];
@@ -101,7 +101,7 @@ public class Rail : MonoBehaviour {
 		previousRailSegment = r;
 	}
 
-	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, int segIndex, bool corrupted = false, float killTime = 20f) {
+	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, int segIndex, bool corrupted = false, float killTime = 25f) {
 		RailSegment r = RailSegment.Create();
 		r.parentRail = this;
 		r.Init(killTime);

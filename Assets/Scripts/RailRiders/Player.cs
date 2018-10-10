@@ -9,14 +9,16 @@ public class Player : RailRider {
 	public static event EventHandler<float> PlayerPowerChanged;
 	private Coroutine boundaryBump;
 	private float charge;
-	private RechargeMarker overlappingMarker;
 
+	private List<RechargeMarker> overlappingMarkers;
 	private List<ICorruption> collidedCorruptions;
 
 	public override void Start () {
 		GameManager.Instance.Player = this;
 		charge = 100;
 		collidedCorruptions = new List<ICorruption>();
+		overlappingMarkers = new List<RechargeMarker>();
+		StartCoroutine(DelayedInit());
 		base.Start();
 	}
 
@@ -32,10 +34,10 @@ public class Player : RailRider {
 			chargeDiff -= 3;
 		} 
 		else if( target.Corrupted ) {
-			chargeDiff -= -8;
+			chargeDiff -= 8;
 		}
 		else {
-			chargeDiff -= -2;
+			chargeDiff -= 2;
 		}
 
 		ModifyCharge(chargeDiff * Time.deltaTime);
@@ -56,15 +58,17 @@ public class Player : RailRider {
 	public void ProcessInputs(InputPackage p) {
 		Vector2 inputDirection = new Vector2(p.Horizontal, p.Vertical);
 
-		if (overlappingMarker != null) {		
-			if (overlappingMarker.IsConditionMet(p.Jump, AttachedRail != null, p.Vertical)) {
-				if( overlappingMarker is SingleMarker ) {
-					SingleMarker m = overlappingMarker as SingleMarker;
+		for(int i = 0; i < overlappingMarkers.Count; i++) {
+			RechargeMarker m = overlappingMarkers[i];
+			if (m.IsConditionMet(p.Jump, AttachedRail != null, p.Vertical)) {
+				if( m is SingleMarker || m is SinusoidHead ) {
 					ModifyCharge(m.Value);
 				}
 				
-				overlappingMarker.ActivatedAction();
-				overlappingMarker = null;
+				m.ActivatedAction();
+
+				overlappingMarkers.RemoveAt(i);
+				i--;
 			}
 		}
 
@@ -110,7 +114,7 @@ public class Player : RailRider {
 			StartCoroutine(RecoverFromBoundaryBump());
 		}
 		else if (collision.gameObject.tag == "RechargeMarker") {
-			overlappingMarker = collision.GetComponent<RechargeMarker>();
+			overlappingMarkers.Add(collision.GetComponent<RechargeMarker>());
 		}
 		else if (collision.gameObject.tag == "RechargePellet") {
 			var pellet = collision.GetComponent<RechargePellet>();
@@ -135,8 +139,8 @@ public class Player : RailRider {
 
 
 	public override void OnTriggerExit2D(Collider2D collision) {
-		if (collision.gameObject.tag == "RechargeMarker") {
-			overlappingMarker = null;
+		if (collision.gameObject?.tag == "RechargeMarker") {
+			overlappingMarkers.Remove(collision.GetComponent<RechargeMarker>());
 		}
 		else if (collision.tag == "Corruption") {
 			var comp =	(collision.GetComponent<CorruptedTrail>() as ICorruption) ??

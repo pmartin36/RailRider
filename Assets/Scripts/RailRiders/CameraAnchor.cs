@@ -15,6 +15,7 @@ public class CameraAnchor : RailRider {
 	public override void Start () {
 		base.Start();
 		currentRotation = Vector2.right;
+		StartCoroutine(DelayedInit());
 	}
 
 	public override void SetTarget() {

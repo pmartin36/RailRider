@@ -25,7 +25,7 @@ public class RailSegment : MonoBehaviour, PoolObject {
 	public RailNode[] Nodes;
 	public int SegmentIndex;
 
-	public RechargeMarker RechargeMarker;
+	public OnRailRechargeMarker RechargeMarker;
 
 	[Header("Pool Object Settings")]
 	[SerializeField]
@@ -54,7 +54,7 @@ public class RailSegment : MonoBehaviour, PoolObject {
 
 	public void Update() {
 		float time = Time.time;
-		if ( pc.enabled && Time.time > (killTime - 5f) ) {
+		if ( pc.enabled && Time.time > (killTime - 2f) ) {
 			pc.enabled = false;
 		}
 		else if ( Time.time > killTime ) {

@@ -9,7 +9,7 @@ public enum MarkerType {
 	Out
 }
 
-public class SingleMarker : RechargeMarker {
+public class SingleMarker : OnRailRechargeMarker {
 
 	MarkerType MarkerType;
 	private SpriteRenderer spriteRenderer;
