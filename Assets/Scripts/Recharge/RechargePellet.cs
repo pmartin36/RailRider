@@ -44,4 +44,8 @@ public class RechargePellet : RechargeMarker, PoolObject {
 		this.gameObject.SetActive(false);
 		PoolManager.Instance.Recycle(this);
 	}
+
+	public override bool IsConditionMet(bool jumping, bool attachedToRail, float direction) {
+		return true;
+	}
 }

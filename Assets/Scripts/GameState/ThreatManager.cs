@@ -19,26 +19,31 @@ public class ThreatManager : MonoBehaviour {
 		if ( Time.time > nextThreatSpawnTime ) {
 			int index = UnityEngine.Random.Range(0, EnemyTypes.Count);
 
-			GameObject o = Instantiate(EnemyTypes[index].gameObject);
-			var type = EnemyTypes[index].type;
-			if (type == "Sinusoid") {
-				nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(10f, 15f);
+			GameObject o = Instantiate(EnemyTypes[0].gameObject);
+			nextThreatSpawnTime = Time.time + 10f;
+			var t = o.GetComponent<CorruptedAIRider>();
+			t.Init();
 
-				var t = o.GetComponent<SinusoidEnemy>();
-				t.Init();
-			} 
-			else if (type == "CorruptedAIRider") {
-				nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
+			//GameObject o = Instantiate(EnemyTypes[index].gameObject);
+			//var type = EnemyTypes[index].type;
+			//if (type == "Sinusoid") {
+			//	nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(10f, 15f);
 
-				var t = o.GetComponent<CorruptedAIRider>();
-				t.Init();
-			}
-			else {
-				nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
+			//	var t = o.GetComponent<SinusoidEnemy>();
+			//	t.Init();
+			//} 
+			//else if (type == "CorruptedAIRider") {
+			//	nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
 
-				var t = o.GetComponent<PatrolEnemy>();
-				t.Init();
-			}
+			//	var t = o.GetComponent<CorruptedAIRider>();
+			//	t.Init();
+			//}
+			//else {
+			//	nextThreatSpawnTime = Time.time + UnityEngine.Random.Range(15f, 20f);
+
+			//	var t = o.GetComponent<PatrolEnemy>();
+			//	t.Init();
+			//}
 		}
 	}
 }

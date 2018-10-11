@@ -22,7 +22,13 @@ public class AIRider : RailRider {
 			// check every 0.5s 
 			if(timeOnRail * 2f > checksOnRail + 1) {
 				if (Random.value > 1f / (1 + checksOnRail)) {
-					StartFreeMovement();
+					float diff = Mathf.Sign(Random.value - 0.5f);
+					if (!AttemptDisconnectInDirectionWithCheck(diff)) {
+						diff *= -1f;
+						if (!AttemptDisconnectInDirectionWithCheck(diff)) {
+							checksOnRail++;
+						}
+					}
 				}
 				else {
 					checksOnRail++;
@@ -37,18 +43,48 @@ public class AIRider : RailRider {
 		}
 	}
 
+	public bool AttemptDisconnectInDirectionWithCheck(float diff) {
+		var proposedRailIndex = AttachedRail.RailIndex + diff;
+		float direction = ((proposedRailIndex + RailManager.NumRails) % RailManager.NumRails) - AttachedRail.RailIndex;
+		float directionSign = Mathf.Sign(direction);
+		float proposedGravity = directionSign * Mathf.Abs(Gravity);
+		float proposedGravitySpeed = 30f * direction;
+
+		// hole avoidance
+		Vector2 proposedDirection = (proposedGravitySpeed * target.Normal + target.Direction * RailSpeed * 0.8f).normalized;
+		Vector2 startPosition = (Vector2)transform.position + proposedDirection * cc.radius * 2f * transform.localScale.x;
+		RaycastHit2D hit = Physics2D.Raycast(startPosition, proposedDirection, 35 * Mathf.Abs(direction), 1 << LayerMask.NameToLayer("Rail"));
+		Debug.DrawRay(startPosition, proposedDirection * 35 * Mathf.Abs(direction), Color.green, 5f);
+		if (hit.collider != null) {
+			Disconnect(proposedGravity, proposedGravitySpeed);
+			return true;
+		}
+		return false;
+	}
+
+	public void DisconnectNoCheck(float diff) {
+		var proposedRailIndex = AttachedRail.RailIndex + diff;
+		float direction = Mathf.Sign(((proposedRailIndex + RailManager.NumRails) % RailManager.NumRails) - AttachedRail.RailIndex);
+		Disconnect(direction * Mathf.Abs(Gravity), direction * 30f);
+	}
+
+	private void Disconnect(float proposedGravity, float speed) {
+		Gravity = proposedGravity;
+		GravitySpeed = speed;
+		lastRail = AttachedRail;
+		DisconnectFromRail();
+	}
+
 	public override void OverranRail() {
 		StartFreeMovement();
 	}
 
 	protected void StartFreeMovement() {
-		var proposedDirection = AttachedRail.RailIndex - 1;
-		float direction = Mathf.Sign(((proposedDirection + RailManager.NumRails) % RailManager.NumRails) - AttachedRail.RailIndex);
-		Gravity = direction * Mathf.Abs(Gravity);
-		GravitySpeed = 30f * direction;
-		lastRail = AttachedRail;
-
-		DisconnectFromRail();
+		float diff = Mathf.Sign(Random.value - 0.5f);	
+		if (!AttemptDisconnectInDirectionWithCheck(diff)) {
+			diff *= -1f;
+			DisconnectNoCheck(diff);
+		}	
 	}
 
 	public override void FreeMovement() {
@@ -71,21 +107,6 @@ public class AIRider : RailRider {
 				checksOnRail = 1;
 				ConnectToRail(new List<RailSegment>() { collision.GetComponent<RailSegment>() });	
 			}
-		}
-	}
-
-	protected override IEnumerator CenterOnRail() {
-		float movement = Mathf.Abs(Gravity) / 5f * Time.deltaTime * Mathf.Sign(distanceToCenter);
-		while (AttachedRail != null && target != null) {
-			if (Mathf.Abs(movement) > Mathf.Abs(distanceToCenter)) {
-				transform.position += distanceToCenter * target.Normal;
-				yield break;
-			}
-			else {
-				transform.position += movement * target.Normal;
-				distanceToCenter -= movement;
-			}
-			yield return new WaitForEndOfFrame();
 		}
 	}
 }

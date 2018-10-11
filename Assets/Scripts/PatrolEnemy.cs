@@ -9,6 +9,8 @@ public class PatrolEnemy : MonoBehaviour, ICorruption {
 	private float moveSpeed;
 	private float maxDistance = 20f;
 
+	private float lifetime;
+
 	public float InitialDamage {
 		get {
 			return 10;
@@ -24,6 +26,7 @@ public class PatrolEnemy : MonoBehaviour, ICorruption {
 		Init();
 		transform.position = targetNode.Position;
 		transform.localRotation = Quaternion.Euler(0, 0, Utils.VectorToAngle(targetNode.Direction));
+		lifetime = 25f;
 	}
 
 	// Update is called once per frame
@@ -32,6 +35,11 @@ public class PatrolEnemy : MonoBehaviour, ICorruption {
 			moveSpeed *= -1f;
 		}
 		transform.position += targetNode.Normal * moveSpeed * Time.deltaTime;
+
+		lifetime -= Time.deltaTime;
+		if (lifetime < 0) {
+			Destroy(this.gameObject);
+		}
 	}
 
 	public void Init() {
@@ -41,7 +49,7 @@ public class PatrolEnemy : MonoBehaviour, ICorruption {
 		target1 = targetNode.Position + targetNode.Normal * maxDistance;
 		target2 = targetNode.Position - targetNode.Normal * maxDistance;
 
-		moveSpeed = Random.Range(10, 18);
+		moveSpeed = Random.Range(18, 25);
 		moveSpeed *= Mathf.Sign(Random.value - 0.5f);
 	}
 }

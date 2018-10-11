@@ -13,6 +13,8 @@ public class Player : RailRider {
 	private List<RechargeMarker> overlappingMarkers;
 	private List<ICorruption> collidedCorruptions;
 
+	private float jumpFudge;
+
 	public override void Start () {
 		GameManager.Instance.Player = this;
 		charge = 100;
@@ -43,6 +45,7 @@ public class Player : RailRider {
 		ModifyCharge(chargeDiff * Time.deltaTime);
 
 		HandleScreenWrap(startPosition, transform.position);
+		jumpFudge -= Time.deltaTime;
 	}
 
 	private void ModifyCharge(float diff){
@@ -72,24 +75,29 @@ public class Player : RailRider {
 			}
 		}
 
+		float pVertAbs = Mathf.Abs(p.Vertical);
+		float pHoriAbs = Mathf.Abs(p.Horizontal);
 		if (AttachedRail != null) {
 			if ( p.Jump ) {
-				if (Mathf.Abs(p.Vertical) > 0.2f) {
+				if (pVertAbs > 0.2f) {
 					float direction = Mathf.Sign(p.Vertical);
 					Gravity = direction * Mathf.Abs(Gravity);
-					GravitySpeed = 10f * direction;
+					GravitySpeed = 20f * direction;
+					if(targetSpeed > RailSpeed * 2f || targetSpeed < -1f) {
+						targetSpeed *= 0.5f;
+					}
 					DisconnectFromRail();
 				}
 				
 			}
-			else if( Mathf.Abs(p.Horizontal) > 0.2f ) {
+			else if( pHoriAbs > 0.2f ) {
 				if (p.Horizontal < 0) {
 					// slow down
-					targetSpeed = -Speed;
+					targetSpeed = Speed * 1.5f * p.Horizontal;
 				}
 				else {
 					// speed up
-					targetSpeed = Speed * 3f;
+					targetSpeed = Speed * 4f * p.Horizontal;
 				}
 			}	
 			else {
@@ -99,13 +107,20 @@ public class Player : RailRider {
 		else  {
 			if (p.Jump) {
 				//should probably use nonAlloc version - fix later for performance
-				ConnectToRailByOverlap(cc.radius * transform.localScale.x);
+				ConnectToRailByOverlap(cc.radius * 0.75f * transform.localScale.x);
+
+				if (AttachedRail == null && jumpFudge < 0) {
+					jumpFudge = 0.10f;
+				}
 			}
 		}
 	}
 
 	public override void OnTriggerEnter2D(Collider2D collision) {
-		if(collision.gameObject.tag == "ScreenBoundary") {
+		if (collision.gameObject.tag == "Rail" && AttachedRail == null && jumpFudge >= 0) {
+			ConnectToRail(new List<RailSegment>() { collision.GetComponent<RailSegment>() });
+		}
+		else if(collision.gameObject.tag == "ScreenBoundary") {
 			float dir = mainCamera.Camera.WorldToViewportPoint(transform.position).x;
 			RailSpeed = Speed * (dir > 0.5f ? -5f : 5f);
 			targetSpeed = Speed;

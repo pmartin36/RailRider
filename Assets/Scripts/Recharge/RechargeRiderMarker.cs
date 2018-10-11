@@ -26,4 +26,8 @@ public class RechargeRiderMarker : OnRailRechargeMarker {
 		rider.ConnectToRail( new List<RailSegment>() { this.AttachedRailSegment } );
 		base.ActivatedAction();
 	}
+
+	public override bool IsConditionMet(bool jumping, bool attachedToRail, float direction) {
+		return jumping && attachedToRail && Mathf.Abs(direction) < 0.2f;
+	}
 }

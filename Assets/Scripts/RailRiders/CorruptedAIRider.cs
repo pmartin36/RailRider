@@ -26,10 +26,10 @@ public class CorruptedAIRider : AIRider, EnemyType {
 		transform.position = nextPosition.Position;	
 
 		if (!nextPosition.Valid) {
-			DisconnectFromRail();
+			StartFreeMovement();
 		}
 		else {
-			SetNextTarget();
+			target = nextPosition;
 		}
 
 		child = transform.GetChild(0);

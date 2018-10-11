@@ -7,9 +7,7 @@ public abstract class RechargeMarker : MonoBehaviour {
 	public static Transform MarkerContainer;
 	public float Value;
 
-	public virtual bool IsConditionMet(bool jumping, bool attachedToRail, float direction) {
-		return attachedToRail && jumping;
-	}
+	public abstract bool IsConditionMet(bool jumping, bool attachedToRail, float direction);
 	public virtual void Init() { }
 	public virtual void Awake() {
 		

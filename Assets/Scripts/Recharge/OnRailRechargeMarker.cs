@@ -28,6 +28,10 @@ public class OnRailRechargeMarker : RechargeMarker, PoolObject {
 		PoolManager.Instance.Recycle(this);
 	}
 
+	public override bool IsConditionMet(bool jumping, bool attachedToRail, float direction) {
+		return attachedToRail && jumping;
+	}
+
 	public static OnRailRechargeMarker Create() {
 		float random = UnityEngine.Random.value;
 		if (random > 0.8f) {

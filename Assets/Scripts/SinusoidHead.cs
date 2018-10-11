@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SinusoidHead : RechargeMarker {
 	public override bool IsConditionMet(bool jumping, bool attachedToRail, float direction) {
-		return jumping;
+		return jumping && Mathf.Abs(direction) < 0.2f;
 	}
 
 	public override void ActivatedAction() {

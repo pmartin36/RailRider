@@ -69,8 +69,8 @@ public class RailRider : MonoBehaviour {
 
 	public virtual void FreeMovement() {
 		GravitySpeed = GravitySpeed + Gravity * Time.deltaTime;
-		if( Mathf.Abs(GravitySpeed) > 30f ) {
-			GravitySpeed = 30f * Mathf.Sign(Gravity);
+		if( Mathf.Abs(GravitySpeed) > 40f ) {
+			GravitySpeed = 40f * Mathf.Sign(Gravity);
 		}
 
 		RailNode camTarget = mainCamera.Anchor.target;
