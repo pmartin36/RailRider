@@ -48,10 +48,10 @@ public class AIRider : RailRider {
 		float direction = ((proposedRailIndex + RailManager.NumRails) % RailManager.NumRails) - AttachedRail.RailIndex;
 		float directionSign = Mathf.Sign(direction);
 		float proposedGravity = directionSign * Mathf.Abs(Gravity);
-		float proposedGravitySpeed = 30f * direction;
+		float proposedGravitySpeed = 20f * direction;
 
 		// hole avoidance
-		Vector2 proposedDirection = (proposedGravitySpeed * target.Normal + target.Direction * RailSpeed * 0.8f).normalized;
+		Vector2 proposedDirection = (proposedGravitySpeed * target.Normal + target.Direction * RailSpeed * 0.725f).normalized;
 		Vector2 startPosition = (Vector2)transform.position + proposedDirection * cc.radius * 2f * transform.localScale.x;
 		RaycastHit2D hit = Physics2D.Raycast(startPosition, proposedDirection, 35 * Mathf.Abs(direction), 1 << LayerMask.NameToLayer("Rail"));
 		Debug.DrawRay(startPosition, proposedDirection * 35 * Mathf.Abs(direction), Color.green, 5f);
@@ -65,7 +65,7 @@ public class AIRider : RailRider {
 	public void DisconnectNoCheck(float diff) {
 		var proposedRailIndex = AttachedRail.RailIndex + diff;
 		float direction = Mathf.Sign(((proposedRailIndex + RailManager.NumRails) % RailManager.NumRails) - AttachedRail.RailIndex);
-		Disconnect(direction * Mathf.Abs(Gravity), direction * 30f);
+		Disconnect(direction * Mathf.Abs(Gravity), 20f * direction);
 	}
 
 	private void Disconnect(float proposedGravity, float speed) {

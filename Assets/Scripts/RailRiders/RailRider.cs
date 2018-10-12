@@ -197,18 +197,25 @@ public class RailRider : MonoBehaviour {
 	}
 
 	protected virtual IEnumerator CenterOnRail() {
-		float movement = Mathf.Abs(Gravity) / 5f * Time.deltaTime * Mathf.Sign(distanceToCenter);
-		while (AttachedRail != null && target != null) {		
-			if( Mathf.Abs(movement) > Mathf.Abs(distanceToCenter) ) {
-				transform.position += distanceToCenter * target.Normal;
-				yield break;
-			}
-			else {
-				transform.position += movement * target.Normal;
-				distanceToCenter -= movement;
-			}
+		while (AttachedRail != null && target != null && Mathf.Abs(distanceToCenter) > 0.1f) {
+			float movement = distanceToCenter * 15f * Time.deltaTime;
+			transform.position += movement * target.Normal;
+			distanceToCenter -= movement;
 			yield return new WaitForEndOfFrame();
 		}
+
+		//float movement = Mathf.Abs(Gravity) / 5f * Time.deltaTime * Mathf.Sign(distanceToCenter);
+		//while (AttachedRail != null && target != null) {		
+		//	if( Mathf.Abs(movement) > Mathf.Abs(distanceToCenter) ) {
+		//		transform.position += distanceToCenter * target.Normal;
+		//		yield break;
+		//	}
+		//	else {
+		//		transform.position += movement * target.Normal;
+		//		distanceToCenter -= movement;
+		//	}
+		//	yield return new WaitForEndOfFrame();
+		//}
 	}
 
 	protected IEnumerator DelayedInit() {

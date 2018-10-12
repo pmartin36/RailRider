@@ -142,8 +142,8 @@ public class RailSegment : MonoBehaviour, PoolObject {
 			vertices[i] = newPosition + normal * Width;
 			vertices[i + ModifiedNumNodes] = newPosition - normal * Width;
 
-			pcPoints[i] = newPosition + normal * Width * 1.2f;
-			pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * Width * 1.2f;
+			pcPoints[i] = newPosition + normal * Width * 0.6f;
+			pcPoints[pcPoints.Length - (i + 1)] = newPosition - normal * Width * 0.6f;
 
 			//Debug.DrawRay(newPosition, rd/2f, Color.green, 2);
 			//Debug.DrawRay(newPosition, normal, Color.cyan, 2);

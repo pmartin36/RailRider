@@ -107,7 +107,7 @@ public class Player : RailRider {
 		else  {
 			if (p.Jump) {
 				//should probably use nonAlloc version - fix later for performance
-				ConnectToRailByOverlap(cc.radius * 0.75f * transform.localScale.x);
+				ConnectToRailByOverlap(cc.radius * transform.localScale.x);
 
 				if (AttachedRail == null && jumpFudge < 0) {
 					jumpFudge = 0.10f;
