@@ -54,7 +54,7 @@ public class Rail : MonoBehaviour {
 		return nodes.FindIndex(r => r.Position == pos);
 	}
 
-	public void SpawnRail(float density, float size, float spawnAngleDiff, int segIndex, float killTime = 25f) {
+	public void SpawnRail(float density, float size, float spawnAngleDiff, int segIndex, float killTime = 15f) {
 		var isCorrupted = UnityEngine.Random.value <= corruptedRailOverrideChance;
 		if (isCorrupted || Perlin.Noise01(Time.time * 5 + seed) <= density) {
 			RailSegment r = CreateRailSegment(size, spawnAngleDiff, segIndex, killTime: killTime);
@@ -101,7 +101,7 @@ public class Rail : MonoBehaviour {
 		previousRailSegment = r;
 	}
 
-	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, int segIndex, bool corrupted = false, float killTime = 25f) {
+	private RailSegment CreateRailSegment(float size, float spawnAngleDiff, int segIndex, bool corrupted = false, float killTime = 15f) {
 		RailSegment r = RailSegment.Create();
 		r.parentRail = this;
 		r.Init(killTime);

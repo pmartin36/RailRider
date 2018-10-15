@@ -11,7 +11,7 @@ public class AIRider : RailRider {
 
 	public override void Start() {		
 		base.Start();
-		targetSpeed = Speed * 2f;
+		targetSpeed = Speed * 1.5f;
 		RailSpeed = targetSpeed;
 		checksOnRail = 1;
 	}
@@ -51,10 +51,10 @@ public class AIRider : RailRider {
 		float proposedGravitySpeed = 20f * direction;
 
 		// hole avoidance
-		Vector2 proposedDirection = (proposedGravitySpeed * target.Normal + target.Direction * RailSpeed * 0.725f).normalized;
+		Vector2 proposedDirection = (proposedGravitySpeed * target.Normal + target.Direction * RailSpeed * 0.7f).normalized;
 		Vector2 startPosition = (Vector2)transform.position + proposedDirection * cc.radius * 2f * transform.localScale.x;
-		RaycastHit2D hit = Physics2D.Raycast(startPosition, proposedDirection, 35 * Mathf.Abs(direction), 1 << LayerMask.NameToLayer("Rail"));
-		Debug.DrawRay(startPosition, proposedDirection * 35 * Mathf.Abs(direction), Color.green, 5f);
+		RaycastHit2D hit = Physics2D.Raycast(startPosition, proposedDirection, 45 * Mathf.Abs(direction), 1 << LayerMask.NameToLayer("Rail"));
+		Debug.DrawRay(startPosition, proposedDirection * 45 * Mathf.Abs(direction), Color.green, 5f);
 		if (hit.collider != null) {
 			Disconnect(proposedGravity, proposedGravitySpeed);
 			return true;

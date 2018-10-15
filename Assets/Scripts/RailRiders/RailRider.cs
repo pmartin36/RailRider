@@ -5,13 +5,15 @@ using UnityEngine;
 
 public class RailRider : MonoBehaviour {
 
+	public static float BaseSpeed = 40;
+
 	public Rail AttachedRail;
 	public RailNode target = RailNode.Invalid;
 	protected float distanceToTarget;
 	protected float distanceToCenter;
 	protected bool CanAttachToRail;
 
-	public float Speed;
+	protected float Speed;
 	protected float targetSpeed;
 	protected float speedx;
 	protected Vector2 speedy;
@@ -31,16 +33,18 @@ public class RailRider : MonoBehaviour {
 	protected CircleCollider2D cc;
 
 	public virtual void Start () {
+		Speed = BaseSpeed;
+
 		RailIndex = 0;
 		RailSpeed = Speed;
-		Gravity = -30f;
+		Gravity = -40f;
 
 		mainCamera = Camera.main.GetComponent<MainCamera>();
 		cc = GetComponent<CircleCollider2D>();
 
 		targetSpeed = Speed;
 		speedChangeDelta = 0.2f;
-		CanAttachToRail = true;
+		CanAttachToRail = true;		
 	}
 
 	public virtual void Update() {

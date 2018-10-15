@@ -51,7 +51,7 @@ public class Player : RailRider {
 	private void ModifyCharge(float diff){
 		charge = Mathf.Clamp(charge+diff, 0, 100);
 		if (charge <= 0) {
-
+			//ded
 		}
 		else {
 			PlayerPowerChanged?.Invoke(this, charge);
@@ -83,7 +83,7 @@ public class Player : RailRider {
 					float direction = Mathf.Sign(p.Vertical);
 					Gravity = direction * Mathf.Abs(Gravity);
 					GravitySpeed = 20f * direction;
-					if(targetSpeed > RailSpeed * 2f || targetSpeed < -1f) {
+					if(targetSpeed > RailSpeed|| targetSpeed < 0) {
 						targetSpeed *= 0.5f;
 					}
 					DisconnectFromRail();
@@ -93,11 +93,11 @@ public class Player : RailRider {
 			else if( pHoriAbs > 0.2f ) {
 				if (p.Horizontal < 0) {
 					// slow down
-					targetSpeed = Speed * 1.5f * p.Horizontal;
+					targetSpeed = Speed * 0.8f * p.Horizontal;
 				}
 				else {
 					// speed up
-					targetSpeed = Speed * 4f * p.Horizontal;
+					targetSpeed = Speed * 2.25f * p.Horizontal;
 				}
 			}	
 			else {
@@ -107,7 +107,8 @@ public class Player : RailRider {
 		else  {
 			if (p.Jump) {
 				//should probably use nonAlloc version - fix later for performance
-				ConnectToRailByOverlap(cc.radius * transform.localScale.x);
+				// 1.25 because we want some fudge factor if the player overshoots the rail
+				ConnectToRailByOverlap(cc.radius * 1.25f * transform.localScale.x);
 
 				if (AttachedRail == null && jumpFudge < 0) {
 					jumpFudge = 0.10f;
@@ -122,7 +123,7 @@ public class Player : RailRider {
 		}
 		else if(collision.gameObject.tag == "ScreenBoundary") {
 			float dir = mainCamera.Camera.WorldToViewportPoint(transform.position).x;
-			RailSpeed = Speed * (dir > 0.5f ? -5f : 5f);
+			RailSpeed = Speed * (dir > 0.5f ? -2.0f : 2.0f);
 			targetSpeed = Speed;
 
 			StopCoroutine(RecoverFromBoundaryBump());
